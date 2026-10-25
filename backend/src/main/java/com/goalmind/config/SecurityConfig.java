@@ -31,7 +31,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173,http://localhost:8080,http://localhost}")
+    @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173,http://localhost:8080,http://localhost,https://goalmind-ai.onrender.com}")
     private String allowedOrigins;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
@@ -77,12 +77,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        List<String> origins = Arrays.stream(allowedOrigins.split(","))
-                .map(String::trim)
-                .toList();
-        configuration.setAllowedOrigins(origins);
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
+        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
         configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
