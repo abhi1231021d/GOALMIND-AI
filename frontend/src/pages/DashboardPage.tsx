@@ -40,6 +40,30 @@ export const DashboardPage: React.FC = () => {
       setGoals(goalsRes.data);
     } catch (err) {
       console.error('Failed to load dashboard data:', err);
+      setData({
+        totalGoals: 0,
+        activeGoals: 0,
+        completedGoals: 0,
+        totalTasks: 0,
+        completedTasks: 0,
+        inProgressTasks: 0,
+        overdueTasks: 0,
+        pendingTasks: 0,
+        totalPlannedMinutes: 0,
+        totalActualMinutes: 0,
+        taskCompletionRate: 0,
+        timeUtilizationRate: 0,
+        goalProgressRate: 0,
+        consistencyRate: 0,
+        currentStreakDays: 0,
+        longestStreakDays: 0,
+        todayPlannedTasks: 0,
+        todayCompletedTasks: 0,
+        todayFocusMinutes: 0,
+        upcomingTasks: [],
+        activeGoalsSummary: []
+      });
+      setGoals([]);
     } finally {
       setIsLoading(false);
     }
