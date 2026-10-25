@@ -16,6 +16,8 @@ An enterprise-grade, full-stack career acceleration platform combining **AI-driv
 
 Most career tools operate in silos: resume builders only format text, interview prep apps test isolated algorithms, and goal planners track static checkboxes.
 
+🌐Live Demo-https://goalmind-ai.onrender.com/
+
 **GoalMind AI bridges these domains into a closed-loop growth flywheel:**
 
 ```
