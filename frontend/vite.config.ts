@@ -14,6 +14,7 @@ export default defineConfig({
   server: {
     port: 3000,
     host: true,
+    allowedHosts: ['goalmind-ai.onrender.com', '.onrender.com', 'localhost', '127.0.0.1'],
     proxy: {
       '/api/health': resumeBackendProxy,
       '/api/config': resumeBackendProxy,
@@ -32,5 +33,10 @@ export default defineConfig({
         secure: false,
       },
     },
+  },
+  preview: {
+    port: 3000,
+    host: true,
+    allowedHosts: ['goalmind-ai.onrender.com', '.onrender.com', 'localhost', '127.0.0.1'],
   },
 });
