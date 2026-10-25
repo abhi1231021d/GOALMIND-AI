@@ -39,12 +39,111 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor for handling session expirations
+// Response Interceptor for handling session expirations & graceful offline/cloud fallback
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    const isOfflineOrCloud500 =
+      !error.response ||
+      error.response.status >= 500 ||
+      error.code === 'ERR_NETWORK' ||
+      String(error.message || '').includes('Network Error');
+
+    const token = localStorage.getItem('goalmind_token');
+    const isDemoSession = token && token.startsWith('demo-token-');
+
+    if (isOfflineOrCloud500 && isDemoSession) {
+      const url = error.config?.url || '';
+
+      // Mock dashboard analytics
+      if (url.includes('/analytics/dashboard')) {
+        return Promise.resolve({
+          data: {
+            totalGoals: 2,
+            activeGoals: 2,
+            completedGoals: 0,
+            totalTasks: 6,
+            completedTasks: 2,
+            inProgressTasks: 1,
+            pendingTasks: 3,
+            taskCompletionRate: 33.3,
+            timeUtilizationRate: 75.0,
+            goalProgressRate: 35.0,
+            consistencyRate: 90.0,
+            currentStreakDays: 4,
+            longestStreakDays: 7,
+            todayPlannedTasks: 2,
+            todayCompletedTasks: 1,
+            todayFocusMinutes: 50,
+            upcomingTasks: [],
+            activeGoalsSummary: []
+          } as DashboardAnalytics
+        });
+      }
+
+      // Mock goals list
+      if (url === '/goals' || url.endsWith('/goals')) {
+        const local = localStorage.getItem('goalmind_local_goals');
+        const goals = local ? JSON.parse(local) : [
+          {
+            id: 1,
+            title: 'Master Cloud Architecture & Kubernetes',
+            description: 'Career intelligence goal pre-configured for cloud exploration',
+            category: 'CAREER',
+            priority: 'HIGH',
+            difficulty: 'CHALLENGING',
+            status: 'ACTIVE',
+            progress: 35,
+            startDate: new Date().toISOString().split('T')[0],
+            targetDate: new Date(Date.now() + 60 * 24 * 3600 * 1000).toISOString().split('T')[0],
+            dailyHours: 2.0,
+            daysPerWeek: 6,
+            milestones: []
+          }
+        ];
+        return Promise.resolve({ data: goals });
+      }
+
+      // Mock feasibility check
+      if (url.includes('/goals/feasibility')) {
+        return Promise.resolve({
+          data: {
+            status: 'FEASIBLE',
+            estimatedWorkloadHours: 120,
+            availableWorkingHours: 160,
+            capacityUtilizationRatio: 0.75,
+            summaryMessage: 'Goal schedule is realistic and achievable with a healthy buffer margin.',
+            constraints: ['Target: 2 hrs/day, 6 days/week'],
+            potentialRisks: ['Maintain regular schedule tracking'],
+            suggestedAdjustments: ['Great plan dimensioning!']
+          } as FeasibilityCheckResponse
+        });
+      }
+
+      // Mock create goal
+      if (error.config?.method === 'post' && (url === '/goals' || url.endsWith('/goals'))) {
+        const body = JSON.parse(error.config.data || '{}');
+        const newGoal = {
+          id: Date.now(),
+          ...body,
+          status: 'ACTIVE',
+          progress: 0,
+          milestones: []
+        };
+        const local = localStorage.getItem('goalmind_local_goals');
+        const goals = local ? JSON.parse(local) : [];
+        goals.push(newGoal);
+        localStorage.setItem('goalmind_local_goals', JSON.stringify(goals));
+        return Promise.resolve({ data: newGoal });
+      }
+
+      // Safe defaults
+      if (url.includes('/notifications')) return Promise.resolve({ data: [] });
+      if (url.includes('/reflections')) return Promise.resolve({ data: [] });
+      if (url.includes('/tasks')) return Promise.resolve({ data: [] });
+    }
+
     if (error.response && error.response.status === 401) {
-      // Clear token on unauthorized
       if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register') && window.location.pathname !== '/') {
         localStorage.removeItem('goalmind_token');
         localStorage.removeItem('goalmind_user');
