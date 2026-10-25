@@ -1,0 +1,54 @@
+# GoalMind AI + Career Intelligence Platform Integration Roadmap
+
+## Objective
+Unify GoalMind AI with AI Resume Analyzer and Interview Simulator into a single cohesive Career Intelligence Platform on `http://localhost:3000` with shared auth, seamless interactive permission bridges, and bidirectional skill mastery loops.
+
+---
+
+### Phase 1: Gateway & Reverse Proxy Configuration
+- [x] Configure `frontend/vite.config.ts` to proxy career suite endpoints (`/api/analyze`, `/api/rewrite`, `/api/interview`, `/api/sessions`, `/api/resume-document`, `/api/company-library`, `/api/dashboard`, `/api/config`) to `http://localhost:8787` and GoalMind endpoints to `http://localhost:8080`.
+
+### Phase 2: Career Suite Styles & Bridge Modal Component
+- [x] Create `frontend/src/styles/career-suite.css` cleanly scoped for the career suite.
+- [x] Create `frontend/src/components/career/GoalMindBridgeModal.tsx` for permission-based handoff into GoalMind learning roadmaps.
+
+### Phase 3: Port Resume Analyzer View
+- [x] Create `frontend/src/pages/ResumeAnalyzerPage.tsx` including:
+  - Audit & Insights (ATS, Recruiter, Health scores)
+  - Keyword and Taxonomy Telemetry with GoalMind bridge
+  - Bento Grid (Strengths, Weaknesses, Improvements) with GoalMind bridge
+  - Role Match & Proof Matrix with GoalMind bridge
+  - Executive Writer Studio & Resume Document Export
+  - Bridge modal confirmation and `sessionStorage` payload dispatch
+
+### Phase 4: Port Interview Simulator View
+- [x] Create `frontend/src/pages/InterviewSimulatorPage.tsx` including:
+  - Setup screen with Role, Mode, Project Defense, and Topic selection
+  - Question player with timer, dictation, pacing telemetry, and STAR framework
+  - Follow-up defense and staff ghost answers
+  - 100+ Question Company Library
+  - Replay and review modal
+  - Bridge modal on low-scoring questions (< 7/10) to master concepts in GoalMind
+
+### Phase 5: Auto-Fill Integration in Goal Creation Wizard
+- [x] Update `frontend/src/pages/CreateGoalPage.tsx` to read `goalmind_bridge_payload` from `sessionStorage`.
+- [x] Pre-populate title, category, reason, target outcome, daily hours, days per week, difficulty.
+- [x] Render informative assessment origin badge.
+
+### Phase 6: Bi-Directional Retest Loop
+- [x] Update `frontend/src/pages/GoalDetailPage.tsx` with a celebration card when progress reaches 100%, linking directly to a 5-minute mock interview in `/interview-simulator`.
+
+### Phase 7: Navigation & Routing Integration
+- [x] Update `frontend/src/components/layout/Navbar.tsx` with navigation links for Goals & Roadmaps, Resume Analyzer, and Interview Simulator.
+- [x] Update `frontend/src/components/layout/Sidebar.tsx` with a dedicated Career Intelligence Suite section.
+- [x] Update `frontend/src/App.tsx` with protected routes for `/resume-analyzer` and `/interview-simulator`.
+
+### Phase 8: Multi-Service Automation Launcher
+- [x] Update `start.ps1` to stop lingering processes and orchestrate both Spring Boot backends (8080 and 8787), frontend (3000), and reverse proxy gateway.
+- [x] Update `start.bat` for seamless execution.
+
+### Phase 9: Empirical Validation & Adversarial Review
+- [x] Typecheck frontend (`npx tsc --noEmit` -> 0 errors).
+- [x] Build frontend (`npm run build` -> 0 errors, 2459 modules bundled).
+- [x] Run backend tests (`mvn test` -> 19 tests run, 0 failures, 0 errors).
+- [x] Adversarial CodeRabbit review (Security, Reliability, Edge Cases, Regressions audited and verified).

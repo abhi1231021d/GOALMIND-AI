@@ -1,0 +1,39 @@
+# Operating System
+.DS_Store
+Thumbs.db
+
+# Environment and Secrets
+.env
+.env.local
+*.key
+
+# Maven / Java
+backend/target/
+backend/.mvn/
+backend/*.log
+backend/out/
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/*.log
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.settings/
+.project
+.classpath
+
+# Databases & Runtime State
+data/
+*.mv.db
+*.trace.db
+*.lock.db
