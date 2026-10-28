@@ -16,23 +16,19 @@ foreach ($port in $portsToClear) {
 
 Start-Sleep -Milliseconds 800
 
-Write-Host ">>> Starting GoalMind Backend (Port 8080)..." -ForegroundColor Green
+# Locate maven wrapper if mvn is not in system PATH
+$mvnPath = "mvn.cmd"
+$localMvn = "C:\Users\abhis\.m2\wrapper\dists\apache-maven-3.9.10\c420edeb14f9688d31a9d0c716a35be33c299d72b0941d215bce33cc6fa81815\bin\mvn.cmd"
+if (Test-Path $localMvn) {
+    $mvnPath = $localMvn
+}
+
+Write-Host ">>> Starting Unified Career Intelligence Monolith Backend (Port 8080)..." -ForegroundColor Green
 $backendJar = Join-Path $root "backend\target\goalmind-backend-1.0.0.jar"
 if (Test-Path $backendJar) {
     Start-Process -FilePath "java.exe" -ArgumentList "-jar `"$backendJar`"" -WorkingDirectory (Join-Path $root "backend") -WindowStyle Hidden
 } else {
-    Start-Process -FilePath "mvn.cmd" -ArgumentList "spring-boot:run" -WorkingDirectory (Join-Path $root "backend") -WindowStyle Hidden
-}
-
-Write-Host ">>> Starting Resume & Interview Backend (Port 8787)..." -ForegroundColor Green
-$resumeJar = "C:\Users\abhis\OneDrive\Documents\project\ai resume analyzer and interview simulator\ai resume analyzer and interview simulator\target\resume-checker-api-1.0.0.jar"
-if (Test-Path $resumeJar) {
-    Start-Process -FilePath "java.exe" -ArgumentList "-jar `"$resumeJar`"" -WorkingDirectory (Split-Path $resumeJar) -WindowStyle Hidden
-} else {
-    $altResumeDir = "C:\Users\abhis\OneDrive\Documents\project\ai resume analyzer and interview simulator\ai resume analyzer and interview simulator"
-    if (Test-Path $altResumeDir) {
-        Start-Process -FilePath "mvn.cmd" -ArgumentList "spring-boot:run" -WorkingDirectory $altResumeDir -WindowStyle Hidden
-    }
+    Start-Process -FilePath $mvnPath -ArgumentList "spring-boot:run" -WorkingDirectory (Join-Path $root "backend") -WindowStyle Hidden
 }
 
 Write-Host ">>> Starting Unified Frontend (Port 3000)..." -ForegroundColor Green
@@ -60,9 +56,10 @@ for ($i = 0; $i -lt 30; $i++) {
 
 if ($started) {
     Write-Host "========================================================" -ForegroundColor Green
-    Write-Host ">>> [SUCCESS] Career Intelligence Platform is online!" -ForegroundColor Green
+    Write-Host ">>> [SUCCESS] Unified Career Intelligence Platform is online!" -ForegroundColor Green
     Write-Host ">>>   Application URL: http://localhost:3000" -ForegroundColor White
     Write-Host ">>>   Includes: GoalMind AI, Resume Analyzer, Interview Simulator" -ForegroundColor White
+    Write-Host ">>>   Single Backend Monolith: http://localhost:8080" -ForegroundColor White
     Write-Host "========================================================" -ForegroundColor Green
 } else {
     Write-Host ">>> Services initialized in background. Visit http://localhost:3000" -ForegroundColor Yellow

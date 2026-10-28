@@ -147,7 +147,7 @@ api.interceptors.response.use(
       if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register') && window.location.pathname !== '/') {
         localStorage.removeItem('goalmind_token');
         localStorage.removeItem('goalmind_user');
-        window.location.href = '/login';
+        window.dispatchEvent(new CustomEvent('auth:unauthorized'));
       }
     }
     return Promise.reject(error);

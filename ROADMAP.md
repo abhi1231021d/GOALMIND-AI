@@ -52,3 +52,33 @@ Unify GoalMind AI with AI Resume Analyzer and Interview Simulator into a single 
 - [x] Build frontend (`npm run build` -> 0 errors, 2459 modules bundled).
 - [x] Run backend tests (`mvn test` -> 19 tests run, 0 failures, 0 errors).
 - [x] Adversarial CodeRabbit review (Security, Reliability, Edge Cases, Regressions audited and verified).
+
+---
+
+## Milestone 2: Enterprise Hardening & Unified Backend Monolith
+
+### Phase 10: Backend Codebase Consolidation (Single Port 8080 JAR)
+- [x] Merge dependencies from `ai resume analyzer and interview simulator/pom.xml` (PDFBox, Tika, etc.) into `backend/pom.xml`.
+- [x] Port `com.resumekit` and `com.example.interview` packages directly into `backend/src/main/java`.
+- [x] Update `frontend/vite.config.ts` to route all `/api/**` endpoints to the single backend on port 8080 (eliminating port 8787).
+
+### Phase 11: Multi-Tenant Isolation for Interview Sessions
+- [x] Associate `com.example.interview.model.InterviewSession` with GoalMind's authenticated `User`.
+- [x] Restrict `GET /api/sessions`, `GET /api/sessions/{id}`, and deletions so users can only access their own practice sessions.
+
+### Phase 12: Security & Resilience Hardening
+- [x] Fix CORS configuration: remove wildcard origin pattern when credentials are enabled; support environment-driven origin whitelist.
+- [x] Configure `RestTemplate` in `AiService` with explicit 5-second connect and 20-second read timeouts.
+- [x] Add PostgreSQL cloud database configuration profile for Render deployment alongside local H2.
+
+### Phase 13: Frontend Optimization & Bundle Splitting
+- [x] Implement `React.lazy()` and `Suspense` for all major routes in `frontend/src/App.tsx`.
+- [x] Verify production bundle splitting cuts initial chunk size under 500KB (initial chunk reduced to 89KB).
+- [x] Replace `window.location.href = '/login'` in `api.ts` with SPA navigation and reactive auth session event handling.
+
+### Phase 14: Verification, Test Suite & Git Synchronization
+- [x] Run backend unit tests (`mvn test` -> 19 passed, 0 failures).
+- [x] Package backend JAR (`mvn package` -> `goalmind-backend-1.0.0.jar` created).
+- [x] Run frontend production build (`npm run build` -> 0 errors, all chunks < 500KB).
+- [x] Run 31-point end-to-end test suite (`node comprehensive-test-suite.js` -> 31/31 PASSED).
+- [x] Synchronize and commit all fixes to Git.

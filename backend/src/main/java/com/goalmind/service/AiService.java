@@ -31,8 +31,16 @@ public class AiService {
     @Value("${app.ai.model:gpt-4o-mini}")
     private String modelName;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final ObjectMapper objectMapper;
+    private final RestTemplate restTemplate;
+
+    public AiService() {
+        this.objectMapper = new ObjectMapper();
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(5000);
+        factory.setReadTimeout(20000);
+        this.restTemplate = new RestTemplate(factory);
+    }
 
     public RoadmapResponse generateRoadmap(Goal goal) {
         if (apiKey != null && !apiKey.isBlank()) {
