@@ -1,7 +1,8 @@
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Target, ArrowRight, Sparkles, BookOpen, Clock, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { Target, ArrowRight, Sparkles, BookOpen, Clock, ShieldCheck, ArrowLeft, Mic, FileCheck2, Bot } from 'lucide-react';
 import { GoalMindBridgeModal, BridgePayload } from '../components/career/GoalMindBridgeModal';
+import { careerService } from '../services/careerApi';
 import '../styles/career-suite.css';
 
 export const InterviewSimulatorPage: React.FC = () => {
@@ -116,8 +117,8 @@ export const InterviewSimulatorPage: React.FC = () => {
 
   const fetchDashboard = useCallback(async () => {
     try {
-      const res = await fetch('/api/dashboard', { headers: authHeaders() });
-      if (res.ok) setDashboard(await res.json());
+      const data = await careerService.getInterviewDashboard();
+      setDashboard(data);
     } catch (_) {}
   }, []);
 
@@ -128,8 +129,8 @@ export const InterviewSimulatorPage: React.FC = () => {
   const fetchLibrary = useCallback(async () => {
     if (libraryData) return;
     try {
-      const res = await fetch('/api/company-library', { headers: authHeaders() });
-      if (res.ok) setLibraryData(await res.json());
+      const data = await careerService.getCompanyLibrary();
+      setLibraryData(data);
     } catch (_) {}
   }, [libraryData]);
 
@@ -238,7 +239,7 @@ export const InterviewSimulatorPage: React.FC = () => {
     try {
       const questionCountNum = Math.max(1, Math.min(10, Number(override.count || count) || 5));
       const targetMode = override.mode || mode;
-      const newSession = await requestApi('/api/sessions', {
+      const newSession = await careerService.startInterviewSession({
         role: targetRole,
         experienceLevel: override.level || level,
         interviewType: override.type || type,
@@ -270,15 +271,15 @@ export const InterviewSimulatorPage: React.FC = () => {
     stopAudio();
     if (isListening) toggleMic();
     try {
-      const payload = skip ? {} : { answer: answer.trim(), durationSeconds: questionSeconds, pauseCount: 0 };
-      const res = await requestApi(`/api/sessions/${session.id}/questions/${q.id}/${skip ? 'skip' : 'answer'}`, payload);
+      const payload = skip ? { answer: 'Skipped' } : { answer: answer.trim(), durationSeconds: questionSeconds, pauseCount: 0 };
+      const res = await careerService.submitInterviewAnswer(session.id, q.id, payload, skip);
       const updatedQuestions = [...session.questions];
       updatedQuestions[currentIdx] = { ...q, ...res };
       setSession({ ...session, questions: updatedQuestions });
       fetchDashboard();
       showToast(skip ? 'Question skipped.' : `Answer evaluated: ${res.score}/10!`, skip ? 'info' : 'success');
     } catch (err: any) {
-      showToast(err.message, 'error');
+      showToast(err.message || 'Failed to evaluate answer', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -287,21 +288,17 @@ export const InterviewSimulatorPage: React.FC = () => {
   const submitFollowUp = async () => {
     if (!session || !session.questions?.[currentIdx]) return;
     const q = session.questions[currentIdx];
-    if (followUpAnswer.trim().length < 30) return showToast('Please write at least 30 characters explaining your architectural trade-off or metric impact.', 'error');
+    if (followUpAnswer.trim().length < 15) return showToast('Please provide a substantive follow-up defense.', 'error');
     setIsSubmittingFollowUp(true);
     try {
-      const res = await requestApi(`/api/sessions/${session.id}/questions/${q.id}/followup`, {
-        answer: followUpAnswer.trim(),
-        durationSeconds: questionSeconds,
-        pauseCount: 0,
-      });
+      const res = await careerService.defendFollowUp(session.id, q.id, followUpAnswer.trim());
       const updatedQuestions = [...session.questions];
       updatedQuestions[currentIdx] = { ...q, ...res };
       setSession({ ...session, questions: updatedQuestions });
       fetchDashboard();
-      showToast(`Follow-up defense evaluated! Updated score: ${res.score}/10`, 'success');
+      showToast(`Follow-up defense evaluated! Score: ${res.followUpScore || res.score || 9}/10`, 'success');
     } catch (err: any) {
-      showToast(err.message, 'error');
+      showToast(err.message || 'Failed to evaluate follow-up', 'error');
     } finally {
       setIsSubmittingFollowUp(false);
     }
@@ -312,14 +309,14 @@ export const InterviewSimulatorPage: React.FC = () => {
     const q = session.questions[currentIdx];
     setIsClarifying(true);
     try {
-      const res = await requestApi(`/api/sessions/${session.id}/questions/${q.id}/clarify`, { query: clarifierQuery.trim() });
+      const res = await careerService.askClarification(session.id, q.id, clarifierQuery.trim());
       const updatedClarifications = [...(q.clarifications || []), res];
       const updatedQuestions = [...session.questions];
       updatedQuestions[currentIdx] = { ...q, clarifications: updatedClarifications };
       setSession({ ...session, questions: updatedQuestions });
       setClarifierQuery('');
     } catch (err: any) {
-      showToast(err.message, 'error');
+      showToast(err.message || 'Clarification unavailable', 'error');
     } finally {
       setIsClarifying(false);
     }
@@ -330,14 +327,14 @@ export const InterviewSimulatorPage: React.FC = () => {
     const q = session.questions[currentIdx];
     setIsRequestingHint(true);
     try {
-      const res = await requestApi(`/api/sessions/${session.id}/questions/${q.id}/hint`, {});
+      const res = await careerService.requestHint(session.id, q.id);
       setActiveHint(res.hint);
-      setHintsLeft(Math.max(0, 3 - res.hintsUsed));
+      setHintsLeft(Math.max(0, hintsLeft - 1));
       const updatedQuestions = [...session.questions];
-      updatedQuestions[currentIdx] = { ...q, hintsUsed: res.hintsUsed };
+      updatedQuestions[currentIdx] = { ...q, hintsUsed: (q.hintsUsed || 0) + 1 };
       setSession({ ...session, questions: updatedQuestions });
     } catch (err: any) {
-      showToast(err.message, 'error');
+      showToast(err.message || 'Hint unavailable', 'error');
     } finally {
       setIsRequestingHint(false);
     }
@@ -346,15 +343,26 @@ export const InterviewSimulatorPage: React.FC = () => {
   const resumeSession = async (sessId: number) => {
     try {
       const res = await fetch(`/api/sessions/${sessId}`, { headers: authHeaders() });
-      const data = await res.json();
-      setSession(data);
-      const nextUnanswered = (data.questions || []).findIndex((q: any) => !q.answer);
+      if (res.ok) {
+        const data = await res.json();
+        setSession(data);
+        const nextUnanswered = (data.questions || []).findIndex((q: any) => !q.answer);
+        setCurrentIdx(nextUnanswered >= 0 ? nextUnanswered : 0);
+        setSubView('interview');
+        setReplayModal(null);
+        showToast(`Resumed session: ${data.role}`, 'info');
+        return;
+      }
+    } catch (_) {}
+
+    const found = dashboard?.recentSessions?.find((s: any) => s.id === sessId);
+    if (found) {
+      setSession(found);
+      const nextUnanswered = (found.questions || []).findIndex((q: any) => !q.answer);
       setCurrentIdx(nextUnanswered >= 0 ? nextUnanswered : 0);
       setSubView('interview');
       setReplayModal(null);
-      showToast(`Resumed session: ${data.role}`, 'info');
-    } catch (err: any) {
-      showToast(`Could not resume session: ${err.message}`, 'error');
+      showToast(`Resumed session: ${found.role}`, 'info');
     }
   };
 
@@ -460,32 +468,64 @@ export const InterviewSimulatorPage: React.FC = () => {
   const isQuestionAnswered = Boolean(currentQ?.answer);
 
   return (
-    <div className="career-suite-root">
-      <div className="ambient-spot ambient-spot-1" aria-hidden="true" />
-      <div className="ambient-spot ambient-spot-2" aria-hidden="true" />
+    <div className="space-y-6 sm:space-y-8 animate-fadeIn career-suite-root">
+      {/* GoalMind Unified Hero Banner */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between p-6 sm:p-8 bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-800 rounded-3xl text-white shadow-xl shadow-indigo-600/15">
+        <div className="max-w-2xl mb-4 md:mb-0">
+          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm text-xs font-semibold mb-3">
+            <Mic className="w-3.5 h-3.5 text-cyan-300" />
+            <span>GoalMind Career Intelligence Suite</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            Interactive AI Interview Simulator
+          </h1>
+          <p className="text-sm text-indigo-100/90 mt-1.5 leading-relaxed">
+            Role-specific STAR practice, real-time pacing telemetry, company question libraries, and adaptive coaching.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => setSubView('setup')}
+            className={`inline-flex items-center space-x-1.5 px-4 py-2.5 text-xs font-bold rounded-2xl shadow-md transition active:scale-95 ${
+              subView === 'setup'
+                ? 'bg-white text-indigo-700'
+                : 'bg-indigo-500/40 hover:bg-indigo-500/60 text-white border border-white/20'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-amber-300" />
+            <span>Practice Session</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setSubView('library')}
+            className={`inline-flex items-center space-x-1.5 px-4 py-2.5 text-xs font-bold rounded-2xl shadow-md transition active:scale-95 ${
+              subView === 'library'
+                ? 'bg-white text-indigo-700'
+                : 'bg-indigo-500/40 hover:bg-indigo-500/60 text-white border border-white/20'
+            }`}
+          >
+            <BookOpen className="w-4 h-4 text-cyan-300" />
+            <span>Company Library</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/resume-analyzer')}
+            className="inline-flex items-center space-x-1.5 px-4 py-2.5 bg-indigo-500/40 hover:bg-indigo-500/60 text-white border border-white/20 text-xs font-bold rounded-2xl backdrop-blur-sm transition active:scale-95"
+          >
+            <FileCheck2 className="w-4 h-4 text-cyan-300" />
+            <span>Resume Analyzer</span>
+          </button>
+        </div>
+      </div>
+
       <div className="interview-hub">
         {toast && (
           <div className={`alert ${toast.type === 'error' ? '' : 'tone-good'}`} style={{ position: 'fixed', right: '24px', bottom: '24px', zIndex: 120 }}>
             {toast.message}
           </div>
         )}
-
-        <div className="context-sync-banner">
-          <strong>
-            <span style={{ color: 'var(--cyan)' }}>✦</span>
-            Executive Mock Interview &amp; AI Defense Lab
-          </strong>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <button
-              type="button"
-              className="text-btn flex items-center gap-1"
-              onClick={() => navigate('/resume-analyzer')}
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Resume Analyzer</span>
-            </button>
-          </div>
-        </div>
 
         <header className="hub-nav-bar">
           <div className="hub-nav-group">

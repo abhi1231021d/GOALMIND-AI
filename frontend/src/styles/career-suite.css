@@ -2,28 +2,46 @@
 .career-suite-root {
   --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --text-head: #f8fafc;
-  --text-body: #e2e8f0;
-  --text-muted: #94a3b8;
+  --text-head: #0f172a;
+  --text-body: #334155;
+  --text-muted: #64748b;
   --indigo: #6366f1;
   --indigo-hover: #4f46e5;
-  --cyan: #38bdf8;
-  --cyan-glow: rgba(56, 189, 248, 0.35);
+  --cyan: #0284c7;
+  --cyan-glow: rgba(2, 132, 199, 0.2);
   --emerald: #10b981;
   --amber: #f59e0b;
   --rose: #f43f5e;
-  --glass-bg: rgba(30, 41, 59, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.16);
-  --glass-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.5);
+  --glass-bg: #ffffff;
+  --glass-border: rgba(226, 232, 240, 0.9);
+  --glass-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
 
   min-height: calc(100vh - 4rem);
-  background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 70%);
+  background: transparent;
   color: var(--text-body);
   font-family: var(--font-sans);
   position: relative;
   overflow-x: hidden;
   border-radius: 1.5rem;
-  padding: 1.5rem;
+  padding: 0;
+}
+
+/* Dark mode theme overrides */
+.dark .career-suite-root {
+  --text-head: #f8fafc;
+  --text-body: #cbd5e1;
+  --text-muted: #94a3b8;
+  --cyan: #38bdf8;
+  --cyan-glow: rgba(56, 189, 248, 0.35);
+  --glass-bg: rgba(15, 23, 42, 0.95);
+  --glass-border: rgba(30, 41, 59, 0.9);
+  --glass-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.5);
+  background: transparent;
+  color: var(--text-body);
+}
+
+.career-suite-root .ambient-spot {
+  display: none !important;
 }
 
 .career-suite-root * {
@@ -200,7 +218,7 @@
   display: flex;
   gap: 12px;
   margin: 28px 0 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid var(--glass-border);
   padding-bottom: 14px;
 }
 .career-suite-root .tabs button {
@@ -225,13 +243,21 @@
 }
 .career-suite-root .tabs button:hover {
   color: var(--text-head);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(99, 102, 241, 0.08);
 }
 .career-suite-root .tabs button.active {
   color: #fff;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(56, 189, 248, 0.2));
-  border: 1px solid rgba(56, 189, 248, 0.4);
-  box-shadow: 0 0 16px rgba(56, 189, 248, 0.2);
+  background: #6366f1;
+  border: 1px solid #4f46e5;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+}
+
+.career-suite-root input,
+.career-suite-root textarea,
+.career-suite-root select {
+  background: var(--glass-bg);
+  color: var(--text-head);
+  border: 1px solid var(--glass-border);
 }
 
 .career-suite-root .alert {

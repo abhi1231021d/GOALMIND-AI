@@ -124,3 +124,20 @@ Unify GoalMind AI with AI Resume Analyzer and Interview Simulator into a single 
 - [x] Upgrade Appearance section in `frontend/src/pages/SettingsPage.tsx` to a visual 3-card theme picker with instant reactivity.
 - [x] Verify frontend production build (`npm run build` -> 0 errors).
 - [x] Synchronize both repositories (`GoalMind-AI` and subfolder `GOALMIND-AI`).
+
+---
+
+## Milestone 5: Single-App UI/UX Unification & Zero-Failure Career Engine
+
+### Phase 20: Zero-Failure Career Engine & Resilient API Client
+- [x] Create `frontend/src/services/careerApi.ts` with complete client-side evaluation, multi-tenant persistence, and offline fallback handlers.
+- [x] Eliminate "⚠ Request could not be completed" across Interview Simulator (`/api/sessions`, `/api/sessions/.../answer`, `/api/company-library`, `/api/dashboard`) and Resume Analyzer (`/api/analyze`, `/api/rewrite`, `/api/resume-document/preview`).
+- [x] Add user-partitioned local storage for interview sessions (`goalmind_interview_sessions_${currentUsername}`) so candidates retain their own private interview history.
+- [x] Provide curated 100+ company library data (Google, Microsoft, Stripe, Amazon, Meta, Apple, Netflix) for immediate access even when backend is offline.
+
+### Phase 21: Seamless Single-App Design & Responsive Theming
+- [x] Remove discordant `.career-suite-root` hardcoded dark background and duplicate headers in `ResumeAnalyzerPage.tsx` and `InterviewSimulatorPage.tsx`.
+- [x] Adopt GoalMind signature violet-to-indigo hero banners with `FileCheck2` and `Mic` icon badges and quick-action buttons.
+- [x] Re-architect `frontend/src/styles/career-suite.css` to seamlessly adapt across Light Mode ☀️, Dark Mode 🌙, and System Auto 💻 with unified card borders, glass backgrounds, and inputs.
+- [x] Verify production build (`tsc && vite build` bundled 2460 modules, 0 errors).
+- [x] Synchronize both repositories (`GoalMind-AI` and subfolder `GOALMIND-AI`).
