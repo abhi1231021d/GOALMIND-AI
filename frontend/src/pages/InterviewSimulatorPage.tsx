@@ -73,6 +73,15 @@ export const InterviewSimulatorPage: React.FC = () => {
     setTimeout(() => setToast(null), 4000);
   };
 
+  const authHeaders = (): Record<string, string> => {
+    const token = localStorage.getItem('goalmind_token');
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  };
+
   const handleConfirmBridge = (payload: BridgePayload) => {
     sessionStorage.setItem('goalmind_bridge_payload', JSON.stringify({
       title: `Master ${payload.skill}`,
@@ -84,16 +93,16 @@ export const InterviewSimulatorPage: React.FC = () => {
       difficulty: 'INTERMEDIATE',
     }));
     setBridgePayload(null);
-    navigate('/create-goal');
+    navigate('/goals/new');
   };
 
   const requestApi = async (path: string, payload: any) => {
     const c = new AbortController();
-    const t = setTimeout(() => c.abort(), 30000);
+    const t = setTimeout(() => c.abort(), 12000);
     try {
       const res = await fetch(path, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify(payload),
         signal: c.signal,
       });
@@ -107,7 +116,7 @@ export const InterviewSimulatorPage: React.FC = () => {
 
   const fetchDashboard = useCallback(async () => {
     try {
-      const res = await fetch('/api/dashboard');
+      const res = await fetch('/api/dashboard', { headers: authHeaders() });
       if (res.ok) setDashboard(await res.json());
     } catch (_) {}
   }, []);
@@ -119,7 +128,7 @@ export const InterviewSimulatorPage: React.FC = () => {
   const fetchLibrary = useCallback(async () => {
     if (libraryData) return;
     try {
-      const res = await fetch('/api/company-library');
+      const res = await fetch('/api/company-library', { headers: authHeaders() });
       if (res.ok) setLibraryData(await res.json());
     } catch (_) {}
   }, [libraryData]);
@@ -336,7 +345,7 @@ export const InterviewSimulatorPage: React.FC = () => {
 
   const resumeSession = async (sessId: number) => {
     try {
-      const res = await fetch(`/api/sessions/${sessId}`);
+      const res = await fetch(`/api/sessions/${sessId}`, { headers: authHeaders() });
       const data = await res.json();
       setSession(data);
       const nextUnanswered = (data.questions || []).findIndex((q: any) => !q.answer);
@@ -351,7 +360,7 @@ export const InterviewSimulatorPage: React.FC = () => {
 
   const openReplay = async (sessId: number) => {
     try {
-      const res = await fetch(`/api/sessions/${sessId}/replay`);
+      const res = await fetch(`/api/sessions/${sessId}/replay`, { headers: authHeaders() });
       if (res.ok) setReplayModal(await res.json());
     } catch (err: any) {
       showToast(`Could not load replay: ${err.message}`, 'error');
@@ -361,7 +370,7 @@ export const InterviewSimulatorPage: React.FC = () => {
   const resetAllSessions = async () => {
     if (!window.confirm('Reset all interview history? This cannot be undone.')) return;
     try {
-      await fetch('/api/sessions', { method: 'DELETE' });
+      await fetch('/api/sessions', { method: 'DELETE', headers: authHeaders() });
       setSession(null);
       fetchDashboard();
       showToast('Interview history reset.', 'info');

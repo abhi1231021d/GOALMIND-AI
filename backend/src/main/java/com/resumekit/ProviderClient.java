@@ -14,8 +14,19 @@ import org.springframework.stereotype.Component;
 @Component
 class ProviderClient {
     private final ObjectMapper mapper;
-    private final HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
+    private volatile HttpClient client;
     private final String key, model, baseUrl;
+
+    private HttpClient getClient() {
+        if (client == null) {
+            synchronized (this) {
+                if (client == null) {
+                    client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(2500)).build();
+                }
+            }
+        }
+        return client;
+    }
 
     ProviderClient(ObjectMapper mapper, @Value("${resume.provider.api-key:}") String key,
                    @Value("${resume.provider.model:gpt-4o-mini}") String model,
@@ -32,17 +43,17 @@ class ProviderClient {
             messages.forEach(pair -> msg.addObject().put("role", pair[0]).put("content", pair[1]));
             if (jsonObject) root.putObject("response_format").put("type", "json_object");
             var request = HttpRequest.newBuilder(URI.create(baseUrl + "/chat/completions"))
-                    .timeout(Duration.ofSeconds(30)).header("Content-Type", "application/json")
+                    .timeout(Duration.ofSeconds(6)).header("Content-Type", "application/json")
                     .header("Authorization", "Bearer " + key)
                     .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(root))).build();
-            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            var response = getClient().send(request, HttpResponse.BodyHandlers.ofString());
             JsonNode payload = mapper.readTree(response.body());
             if (response.statusCode() / 100 != 2)
                 throw new IllegalStateException(payload.path("error").path("message").asText("Provider request failed (" + response.statusCode() + ")"));
             return payload.path("choices").path(0).path("message").path("content").asText("");
         } catch (Exception e) {
             if (e instanceof IllegalStateException) throw (IllegalStateException)e;
-            throw new IllegalStateException("AI provider request failed.", e);
+            throw new IllegalStateException("AI provider request failed: " + e.getMessage(), e);
         }
     }
 }

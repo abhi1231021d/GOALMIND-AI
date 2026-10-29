@@ -82,3 +82,26 @@ Unify GoalMind AI with AI Resume Analyzer and Interview Simulator into a single 
 - [x] Run frontend production build (`npm run build` -> 0 errors, all chunks < 500KB).
 - [x] Run 31-point end-to-end test suite (`node comprehensive-test-suite.js` -> 31/31 PASSED).
 - [x] Synchronize and commit all fixes to Git.
+
+---
+
+## Milestone 3: AI Reliability & Latency Optimization
+
+### Phase 15: Resume Extraction & Validation Resilience
+- [x] Prevent false rejections on real resumes in `ResumeValidator.java` and `ResumeAnalyzerPage.tsx` by relaxing heading regex, supporting modern titles/frameworks/dates, and bypassing raw text checks on binary PDF/DOCX uploads.
+- [x] Upgrade `ResumeExtractionService.java` with 3-layer PDF extraction: Column-aware stripper -> standard PDFTextStripper -> Apache Tika parser fallback.
+- [x] Upgrade `AnalysisContractValidator.java` with normalized excerpt matching (`containsEvidence`, `normalizeForMatch`) to handle whitespace, CRLF vs LF, non-breaking spaces, and unicode quotes/dashes without throwing unhandled exceptions.
+- [x] Harden `ResumeService.java` with `safeValidate` to guarantee valid structured analysis even under excerpt variance.
+
+### Phase 16: Zero-Freeze Latency & Fallback Architecture
+- [x] Reduce HTTP client connect (2.5s) and read (6s) timeouts across `ProviderClient.java` and `AiService.java`.
+- [x] Implement instant deterministic fallbacks (`demo.analyze()`, `orchestrator.offlineRewrite()`, and `generateRuleBasedRoadmap()`).
+- [x] Add lazy initialization for `HttpClient` in `ProviderClient.java` to prevent loopback socket failures on restricted environments/containers.
+- [x] Standardize AI performance endpoint routing (`@PostMapping({"/analyse-performance/{goalId}", "/analyze-performance/{goalId}"})`).
+
+### Phase 17: Multi-Tenant Session Security & Navigation Polish
+- [x] Synchronize all authentication headers (`Authorization: Bearer <token>`) across `ResumeAnalyzerPage.tsx` and `InterviewSimulatorPage.tsx` for multi-tenant security.
+- [x] Add route alias `<Route path="/create-goal" element={<CreateGoalPage />} />` in `frontend/src/App.tsx`.
+- [x] Standardize bridge redirects to `/goals/new`.
+- [x] Add unit test suite `ResumeServiceTest.java` (4/4 passing).
+- [x] Verify backend compilation and packaging (`BUILD SUCCESS` in 8.7s) and frontend production build (`tsc && vite build` in 6.9s).

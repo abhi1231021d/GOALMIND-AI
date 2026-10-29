@@ -49,6 +49,7 @@ export const App: React.FC = () => {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/goals" element={<GoalsPage />} />
             <Route path="/goals/new" element={<CreateGoalPage />} />
+            <Route path="/create-goal" element={<CreateGoalPage />} />
             <Route path="/goals/:id" element={<GoalDetailPage />} />
             <Route path="/goals/:id/roadmap" element={<AiRoadmapPage />} />
 

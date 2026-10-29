@@ -5,6 +5,8 @@ import java.util.Base64;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.EncryptedDocumentException;
 import org.apache.tika.metadata.Metadata;
@@ -40,28 +42,40 @@ class ResumeExtractionService {
                 throw new IllegalArgumentException("Unsupported resume file type. Executable files are not supported.");
 
             if ("application/pdf".equals(type) || "pdf".equalsIgnoreCase(extension(request.fileName()))) {
+                // Layer 1: Column-aware layout stripper
                 try {
                     String pdfText = ColumnAwarePdfStripper.extractText(bytes);
                     String result = clean(pdfText);
-                    if (result.isBlank()) {
-                        throw new IllegalArgumentException("This PDF contains no selectable text. Scanned or image-only PDFs need OCR before upload.");
+                    if (!result.isBlank()) {
+                        return result;
                     }
-                    return result;
                 } catch (org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException e) {
                     throw new IllegalArgumentException("This resume file is encrypted or password-protected. Remove the password and try again.");
-                } catch (IllegalArgumentException e) {
-                    throw e;
-                } catch (Exception e) {
-                    // Fall back to Tika parser if PDFBox layout stripper encounters an unusual stream
+                } catch (Exception ignored) {
+                    // Fall back to standard PDFTextStripper
+                }
+
+                // Layer 2: Standard PDFTextStripper
+                try (PDDocument doc = PDDocument.load(new ByteArrayInputStream(bytes))) {
+                    PDFTextStripper fallbackStripper = new PDFTextStripper();
+                    String standardText = clean(fallbackStripper.getText(doc));
+                    if (!standardText.isBlank()) {
+                        return standardText;
+                    }
+                } catch (org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException e) {
+                    throw new IllegalArgumentException("This resume file is encrypted or password-protected. Remove the password and try again.");
+                } catch (Exception ignored) {
+                    // Fall back to Tika parser
                 }
             }
 
+            // Layer 3: Apache Tika AutoDetectParser
             BodyContentHandler handler = new BodyContentHandler(-1);
             AutoDetectParser parser = new AutoDetectParser(tika);
             parser.parse(new ByteArrayInputStream(bytes), handler, metadata, new ParseContext());
             String result = clean(handler.toString());
             if (result.isBlank()) {
-                if ("application/pdf".equals(type))
+                if ("application/pdf".equals(type) || "pdf".equalsIgnoreCase(extension(request.fileName())))
                     throw new IllegalArgumentException("This PDF contains no selectable text. Scanned or image-only PDFs need OCR before upload.");
                 throw new IllegalArgumentException("The file contains no readable text.");
             }
@@ -69,7 +83,7 @@ class ResumeExtractionService {
         } catch (EncryptedDocumentException e) {
             throw new IllegalArgumentException("This resume file is encrypted or password-protected. Remove the password and try again.");
         } catch (IllegalArgumentException e) { throw e; }
-        catch (Exception e) { throw new IllegalArgumentException("Could not extract readable resume text from that file."); }
+        catch (Exception e) { throw new IllegalArgumentException("Could not extract readable resume text from that file: " + e.getMessage()); }
     }
 
     private boolean isBlocked(String type, String name) {

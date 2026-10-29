@@ -49,7 +49,7 @@ public class AiController {
         this.consistencyEngine = consistencyEngine;
     }
 
-    @PostMapping("/analyse-performance/{goalId}")
+    @PostMapping({"/analyse-performance/{goalId}", "/analyze-performance/{goalId}"})
     public ResponseEntity<AiPerformanceReportResponse> analyzePerformance(@PathVariable Long goalId) {
         User user = authService.getAuthenticatedUser();
         Goal goal = goalRepository.findByIdAndUserId(goalId, user.getId())

@@ -59,42 +59,48 @@ const roleProfiles = [
 function isResumeText(text: string): boolean {
   if (!text || typeof text !== 'string') return false;
   const trimmed = text.trim();
-  if (trimmed.length < 20) return false;
+  if (trimmed.length < 25) return false;
 
   const hasCode = /^\s*(import\s+[a-z0-9_.]+|package\s+[a-z0-9_.]+|#include\s*<|public\s+class\s+|def\s+[a-z_]|class\s+[A-Za-z0-9_]+\s*:|function\s+[a-z_]|const\s+[a-z_].*=\s*require|<!DOCTYPE\s+html|<html[\s>])/m.test(trimmed);
   const hasInvoice = /\b(invoice\s+(?:number|#|no|date)|bill\s+to\s*:|amount\s+due|total\s+due|subtotal\s*:|remit\s+(?:payment|to)|due\s+date\s*:)\b/i.test(trimmed);
   const hasLegal = /\b(terms\s+of\s+service|privacy\s+policy|terms\s+and\s+conditions|all\s+rights\s+reserved|governing\s+law)\b/i.test(trimmed);
   const hasRecipe = /\b(prep\s+time\s*:|cook\s+time\s*:|servings\s*:|preheat\s+oven|tablespoons?\s+of)\b/i.test(trimmed);
 
-  const sectionRegex = /^[\s#*•-]*\b(experience|work\s+experience|professional\s+experience|employment|work\s+history|career\s+history|positions\s+held|education|academic\s+background|skills|technical\s+skills|core\s+competencies|summary|professional\s+summary|executive\s+summary|career\s+objective|profile|projects|key\s+projects|certifications|certificates|awards|honors|publications|volunteer)\b[\s:—–-]*$/im;
+  const sectionRegex = /^[\s#*•-]*\b(experience|work|employment|career|history|positions|education|academic|qualifications?|degree|skills?|technical|technologies|proficiencies|competencies|summary|profile|objective|statement|about\s+me|projects?|portfolio|certifications?|certificates?|credentials|licenses?|awards?|honors?|coursework|training|background|achievements?|expertise)\b/im;
   const lines = trimmed.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   const sectionCount = lines.filter(line => sectionRegex.test(line)).length;
   const hasResumeKeyword = /\b(r[ée]sum[ée]|curriculum\s+vitae|\bcv\b)/i.test(trimmed);
 
-  if ((hasCode || hasInvoice || hasLegal || hasRecipe) && sectionCount === 0 && !hasResumeKeyword) {
+  const hasContact = /[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}|(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}|linkedin\.com\/in\/|github\.com\//i.test(trimmed);
+
+  if ((hasCode || hasInvoice || hasLegal || hasRecipe) && sectionCount === 0 && !hasResumeKeyword && !hasContact) {
     return false;
   }
 
-  const hasDateRange = /\b(?:19|20)\d{2}\s*(?:-|–|—|to)\s*(?:present|current|(?:19|20)\d{2})\b|\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+(?:19|20)\d{2}\b/i.test(trimmed);
-  const hasContact = /[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}|(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}|linkedin\.com\/in\/|github\.com\//i.test(trimmed);
-  const hasRole = /\b(engineer|developer|designer|manager|specialist|analyst|consultant|coordinator|director|lead|intern|associate|architect|administrator|officer|technician|representative|executive|supervisor|assistant|nurse|accountant|scientist|teacher|sales|recruiter|programmer|writer)\b/i.test(trimmed);
-  const actionCount = (trimmed.match(/\b(led|built|created|improved|managed|delivered|designed|launched|reduced|increased|developed|owned|coordinated|implemented|maintained|collaborated|achieved|analyzed|spearheaded|streamlined|supervised|engineered|programmed|supported|resolved|guided|facilitated|trained)\b/gi) || []).length;
+  const hasDateRange = /\b(?:19|20)\d{2}\s*(?:-|–|—|to|\/)\s*(?:present|current|now|(?:19|20)\d{2}|\d{2})\b|\b(?:0?[1-9]|1[0-2])\/(?:19|20)?\d{2}\b|\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+(?:19|20)?\d{2}\b|\b(?:since|from)\s+(?:19|20)\d{2}\b/i.test(trimmed);
+  const hasRole = /\b(engineer|developer|designer|manager|specialist|analyst|consultant|coordinator|director|lead|intern|associate|architect|administrator|officer|technician|representative|executive|supervisor|assistant|nurse|accountant|scientist|teacher|sales|recruiter|programmer|writer|editor|founder|co-founder|vp|head|student|researcher)\b/i.test(trimmed);
+  const actionCount = (trimmed.match(/\b(led|built|created|improved|managed|delivered|designed|launched|reduced|increased|developed|owned|coordinated|implemented|maintained|collaborated|achieved|analyzed|spearheaded|streamlined|supervised|engineered|programmed|supported|resolved|guided|facilitated|trained|automated|researched)\b/gi) || []).length;
   const bulletCount = lines.filter(l => /^[\s•●▪◦*-]+\s+\S+|^\s*\d+[.)]\s+\S+/.test(l)).length;
-  const hasKnownSkill = /\b(java|python|javascript|typescript|c\+\+|c#|sql|html|css|react|angular|vue|aws|azure|gcp|docker|kubernetes|linux|git|agile|scrum|figma|analytics)\b/i.test(trimmed);
+  const hasKnownSkill = /\b(java|python|javascript|typescript|c\+\+|c#|sql|html|css|react|angular|vue|aws|azure|gcp|docker|kubernetes|linux|git|agile|scrum|figma|analytics|excel|word|spring|node|nodejs|express|django|flask|rest|api|cloud|data)\b/i.test(trimmed);
 
   let score = 0;
   if (hasResumeKeyword) score += 4;
   score += Math.min(sectionCount * 3, 9);
   if (hasDateRange) score += 3;
-  if (hasContact) score += 2;
+  if (hasContact) score += 3;
   if (hasRole) score += 2;
   if (actionCount >= 3) score += 3;
   else if (actionCount >= 1) score += 1;
   if (bulletCount >= 2) score += 2;
   if (hasKnownSkill) score += 2;
 
-  const structuralAnchor = (sectionCount >= 1) || hasResumeKeyword || (hasRole && hasDateRange);
-  return score >= 5 && structuralAnchor;
+  const structuralAnchor = (sectionCount >= 1)
+    || hasResumeKeyword
+    || (hasRole && (hasDateRange || hasKnownSkill || actionCount >= 1))
+    || (hasContact && (hasKnownSkill || hasRole || sectionCount >= 1))
+    || (hasDateRange && (hasKnownSkill || actionCount >= 1));
+
+  return score >= 4 && structuralAnchor;
 }
 
 function detectedExperienceRole(lines: string[]): string {
@@ -227,6 +233,15 @@ export const ResumeAnalyzerPage: React.FC = () => {
   // GoalMind Bridge Modal State
   const [bridgePayload, setBridgePayload] = useState<BridgePayload | null>(null);
 
+  const authHeaders = (): Record<string, string> => {
+    const token = localStorage.getItem('goalmind_token');
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  };
+
   const handleConfirmBridge = (payload: BridgePayload) => {
     sessionStorage.setItem('goalmind_bridge_payload', JSON.stringify({
       title: `Master ${payload.skill}`,
@@ -238,12 +253,12 @@ export const ResumeAnalyzerPage: React.FC = () => {
       difficulty: 'INTERMEDIATE',
     }));
     setBridgePayload(null);
-    navigate('/create-goal');
+    navigate('/goals/new');
   };
 
   useEffect(() => {
     const c = new AbortController();
-    fetch('/api/config', { signal: c.signal })
+    fetch('/api/config', { headers: authHeaders(), signal: c.signal })
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(cfg => setProviderConfigured(Boolean(cfg.providerConfigured)))
       .catch(() => setProviderConfigured(false));
@@ -252,11 +267,11 @@ export const ResumeAnalyzerPage: React.FC = () => {
 
   const requestApi = async (path: string, payload: any) => {
     const c = new AbortController();
-    const t = setTimeout(() => c.abort(), 30000);
+    const t = setTimeout(() => c.abort(), 12000);
     try {
       const res = await fetch(path, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify(payload),
         signal: c.signal
       });
@@ -277,19 +292,17 @@ export const ResumeAnalyzerPage: React.FC = () => {
     }
     setError(''); setIsAnalyzing(true);
     try {
-      if (providerConfigured || filePayload) {
-        try {
-          const res = await requestApi('/api/analyze', filePayload || { resume });
-          setResult(res);
-          setAnalysisMode(providerConfigured ? 'Live AI' : 'AI Audit');
-        } catch (err: any) {
-          setResult(null);
-          throw err;
+      try {
+        const res = await requestApi('/api/analyze', filePayload || { resume });
+        setResult(res);
+        setAnalysisMode(providerConfigured ? 'Live AI' : 'AI Audit');
+      } catch (backendErr: any) {
+        if (!filePayload && resume.trim()) {
+          setResult(buildDemoResult(resume));
+          setAnalysisMode('AI Audit');
+        } else {
+          throw backendErr;
         }
-      } else {
-        await new Promise(r => setTimeout(r, 200));
-        setResult(buildDemoResult(resume));
-        setAnalysisMode('AI Audit');
       }
     } catch (err: any) {
       setResult(null);
@@ -353,16 +366,15 @@ export const ResumeAnalyzerPage: React.FC = () => {
     }
     setError(''); setIsRewriting(true);
     try {
-      if (providerConfigured || filePayload) {
-        try {
-          const d = await requestApi('/api/rewrite', { ...(filePayload || { resume }), template: selectedTemplate, targetRole, experienceDetails, jobDescription });
-          setRewritten(d.rewritten);
-        } catch (e) {
-          setRewritten('');
-          throw e;
+      try {
+        const d = await requestApi('/api/rewrite', { ...(filePayload || { resume }), template: selectedTemplate, targetRole, experienceDetails, jobDescription });
+        setRewritten(d.rewritten);
+      } catch (backendErr: any) {
+        if (!filePayload && resume.trim()) {
+          setRewritten(`${resume.trim()}\n\nTARGET ROLE: ${targetRole || 'General'}\nADDITIONAL DETAILS: ${experienceDetails || 'None'}\n\n[Optimized in ${selectedTemplate.toUpperCase()} style]`);
+        } else {
+          throw backendErr;
         }
-      } else {
-        setRewritten(`${resume.trim()}\n\nTARGET ROLE: ${targetRole || 'General'}\nADDITIONAL DETAILS: ${experienceDetails || 'None'}\n\n[Optimized in ${selectedTemplate.toUpperCase()} style]`);
       }
     } catch (e: any) {
       setRewritten('');
@@ -398,7 +410,7 @@ export const ResumeAnalyzerPage: React.FC = () => {
     try {
       const res = await fetch(`/api/resume-document/export/${format}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify(resumeDocReq())
       });
       if (!res.ok) throw new Error('Export failed');

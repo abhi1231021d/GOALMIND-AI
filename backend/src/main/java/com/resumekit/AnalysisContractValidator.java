@@ -139,16 +139,36 @@ class AnalysisContractValidator {
     }
     private void requireEvidence(String resume, String evidence, String name) {
         requireText(name, evidence);
-        if (resume == null || !resume.contains(evidence)) throw invalid(name + " is not an exact resume excerpt");
+        if (!containsEvidence(resume, evidence)) throw invalid(name + " is not an exact resume excerpt");
     }
     private void requirePresentSkill(String resume, String skill) {
         requireText("career bridge skill", skill);
-        String lowerSkill = skill.toLowerCase(Locale.ROOT);
-        String lowerResume = resume == null ? "" : resume.toLowerCase(Locale.ROOT);
+        String lowerSkill = normalizeForMatch(skill);
+        String lowerResume = normalizeForMatch(resume == null ? "" : resume);
         boolean present = lowerResume.contains(lowerSkill)
                 || (lowerSkill.endsWith("s") && lowerResume.contains(lowerSkill.substring(0, lowerSkill.length() - 1)));
         if (!present)
             throw invalid("career bridge skill is not present in resume text");
+    }
+    private boolean containsEvidence(String resume, String evidence) {
+        if (resume == null || evidence == null || evidence.isBlank()) return false;
+        if (resume.contains(evidence)) return true;
+        String normResume = normalizeForMatch(resume);
+        String normEvidence = normalizeForMatch(evidence);
+        return normResume.contains(normEvidence);
+    }
+    private String normalizeForMatch(String s) {
+        return s.replace('\u00A0', ' ')
+                .replace('\u2013', '-')
+                .replace('\u2014', '-')
+                .replace('\u2018', '\'')
+                .replace('\u2019', '\'')
+                .replace('\u201C', '"')
+                .replace('\u201D', '"')
+                .replaceAll("\\r\\n|\\r|\\n", " ")
+                .replaceAll("\\s+", " ")
+                .trim()
+                .toLowerCase(Locale.ROOT);
     }
     private void requireDistance(String distance) {
         if (!Set.of("Ready now", "Small gap", "Larger step").contains(distance))

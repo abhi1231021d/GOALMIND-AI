@@ -37,8 +37,8 @@ public class AiService {
     public AiService() {
         this.objectMapper = new ObjectMapper();
         org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(5000);
-        factory.setReadTimeout(20000);
+        factory.setConnectTimeout(2500);
+        factory.setReadTimeout(6000);
         this.restTemplate = new RestTemplate(factory);
     }
 

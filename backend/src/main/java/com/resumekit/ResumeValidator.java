@@ -26,17 +26,14 @@ public final class ResumeValidator {
             "(?i)\\b(r[ée]sum[ée]|curriculum\\s+vitae|\\bcv\\b)");
 
     private static final Pattern SECTION_HEADING = Pattern.compile(
-            "(?i)^[\\s#*•-]*\\b(experience|work\\s+experience|professional\\s+experience|employment(?:\\s+history)?|work\\s+history|career\\s+history|positions\\s+held"
-            + "|education|academic\\s+background|academic\\s+history|academic\\s+qualifications|degrees?"
-            + "|skills|technical\\s+skills|core\\s+competencies|areas\\s+of\\s+expertise|technologies|proficiencies|key\\s+skills|tools\\s+&(?:amp;)?\\s+technologies"
-            + "|summary|professional\\s+summary|executive\\s+summary|career\\s+objective|profile|about\\s+me|personal\\s+statement"
-            + "|projects|key\\s+projects|selected\\s+projects|personal\\s+projects|portfolio"
-            + "|certifications|certificates|licenses|credentials|accreditations"
-            + "|awards|honors|publications|volunteer(?:\\s+experience)?|extracurricular)\\b[\\s:—–-]*$");
+            "(?i)^[\\s#*•-]*\\b(experience|work|employment|career|history|positions|education|academic|qualifications?|degree|degrees|skills?|technical|technologies|proficiencies|competencies|summary|profile|objective|statement|about\\s+me|projects?|portfolio|certifications?|certificates?|credentials|licenses?|awards?|honors?|coursework|training|background|achievements?|expertise)\\b.*",
+            Pattern.MULTILINE);
 
     private static final Pattern DATE_RANGE = Pattern.compile(
-            "(?i)\\b(?:19|20)\\d{2}\\s*(?:-|–|—|to)\\s*(?:present|current|(?:19|20)\\d{2})\\b|"
-            + "\\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?\\s+(?:19|20)\\d{2}\\b");
+            "(?i)\\b(?:19|20)\\d{2}\\s*(?:-|–|—|to|/)\\s*(?:present|current|now|(?:19|20)\\d{2}|\\d{2})\\b|"
+            + "\\b(?:0?[1-9]|1[0-2])/(?:19|20)?\\d{2}\\b|"
+            + "\\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?\\s+(?:19|20)?\\d{2}\\b|"
+            + "\\b(?:since|from)\\s+(?:19|20)\\d{2}\\b");
 
     private static final Pattern CONTACT_EMAIL = Pattern.compile(
             "[\\w.+-]+@[\\w-]+\\.[a-zA-Z]{2,}");
@@ -48,7 +45,7 @@ public final class ResumeValidator {
             "(?i)\\b(?:linkedin\\.com/in/|github\\.com/)\\S+");
 
     private static final Pattern ROLE_TITLES = Pattern.compile(
-            "(?i)\\b(engineer|developer|designer|manager|specialist|analyst|consultant|coordinator|director|lead|intern|associate|architect|administrator|officer|technician|representative|executive|supervisor|assistant|nurse|accountant|scientist|teacher|sales|recruiter|programmer|writer|editor)\\b");
+            "(?i)\\b(engineer|developer|designer|manager|specialist|analyst|consultant|coordinator|director|lead|intern|associate|architect|administrator|officer|technician|representative|executive|supervisor|assistant|nurse|accountant|scientist|teacher|sales|recruiter|programmer|writer|editor|founder|co-founder|vp|head|fellow|student|researcher|candidate)\\b");
 
     private static final Pattern ACTION_VERBS = Pattern.compile(
             "(?i)\\b(led|built|created|improved|managed|delivered|designed|launched|reduced|increased|developed|owned|coordinated|implemented|maintained|collaborated|achieved|analyzed|spearheaded|streamlined|supervised|engineered|programmed|supported|resolved|guided|facilitated|trained|negotiated|authored|presented|automated|researched)\\b");
@@ -57,14 +54,14 @@ public final class ResumeValidator {
             "(?m)^[\\s•●▪◦*-]+\\s+\\S+|^\\s*\\d+[.)]\\s+\\S+");
 
     private static final Pattern COMMON_TECH_OR_SKILL = Pattern.compile(
-            "(?i)\\b(java|python|javascript|typescript|c\\+\\+|c#|sql|html|css|react|angular|vue|aws|azure|gcp|docker|kubernetes|linux|git|agile|scrum|figma|analytics)\\b");
+            "(?i)\\b(java|python|javascript|typescript|c\\+\\+|c#|sql|html|css|react|angular|vue|aws|azure|gcp|docker|kubernetes|linux|git|agile|scrum|figma|analytics|excel|word|powerpoint|spring|node|nodejs|express|django|flask|rest|api|devops|cloud|tableau|powerbi|machine\\s+learning|data)\\b");
 
     private ResumeValidator() {}
 
     public static boolean isResume(String text) {
         if (text == null) return false;
         String trimmed = text.trim();
-        if (trimmed.length() < 20) return false;
+        if (trimmed.length() < 25) return false;
 
         String[] words = trimmed.split("\\s+");
         if (words.length < 5) return false;
@@ -85,8 +82,8 @@ public final class ResumeValidator {
         int bulletCount = countMatches(BULLET_POINT, trimmed);
         boolean hasKnownSkill = COMMON_TECH_OR_SKILL.matcher(trimmed).find();
 
-        // Immediate disqualification if strong anti-patterns match and no resume sections/keywords
-        if ((codeMatches >= 1 || invoiceMatches >= 2 || legalMatches >= 1 || recipeMatches >= 1) && sectionCount == 0 && !hasResumeKeyword) {
+        // Immediate disqualification if strong anti-patterns match and no resume sections/keywords/contacts
+        if ((codeMatches >= 1 || invoiceMatches >= 2 || legalMatches >= 1 || recipeMatches >= 1) && sectionCount == 0 && !hasResumeKeyword && !hasContact) {
             return false;
         }
 
@@ -95,24 +92,28 @@ public final class ResumeValidator {
         if (hasResumeKeyword) score += 4;
         score += Math.min(sectionCount * 3, 9);
         if (hasDateRange) score += 3;
-        if (hasContact) score += 2;
+        if (hasContact) score += 3;
         if (hasRole) score += 2;
         if (actionCount >= 3) score += 3;
         else if (actionCount >= 1) score += 1;
         if (bulletCount >= 2) score += 2;
         if (hasKnownSkill) score += 2;
 
-        boolean structuralAnchor = (sectionCount >= 1) || hasResumeKeyword || (hasRole && hasDateRange);
-        return score >= 5 && structuralAnchor;
+        boolean structuralAnchor = (sectionCount >= 1)
+                || hasResumeKeyword
+                || (hasRole && (hasDateRange || hasKnownSkill || actionCount >= 1))
+                || (hasContact && (hasKnownSkill || hasRole || sectionCount >= 1))
+                || (hasDateRange && (hasKnownSkill || actionCount >= 1));
+
+        return score >= 4 && structuralAnchor;
     }
 
     private static int countSectionHeadings(String text) {
         int count = 0;
-        for (String line : text.split("\\R")) {
-            String trimmed = line.trim();
-            if (SECTION_HEADING.matcher(trimmed).matches()) {
-                count++;
-            }
+        Matcher m = SECTION_HEADING.matcher(text);
+        while (m.find()) {
+            count++;
+            if (count >= 10) break;
         }
         return count;
     }
