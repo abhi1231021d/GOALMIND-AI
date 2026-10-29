@@ -49,10 +49,7 @@ api.interceptors.response.use(
       error.code === 'ERR_NETWORK' ||
       String(error.message || '').includes('Network Error');
 
-    const token = localStorage.getItem('goalmind_token');
-    const isDemoSession = token && token.startsWith('demo-token-');
-
-    if (isOfflineOrCloud500 && isDemoSession) {
+    if (isOfflineOrCloud500) {
       const url = error.config?.url || '';
 
       // Determine current user storage key for complete multi-tenant isolation

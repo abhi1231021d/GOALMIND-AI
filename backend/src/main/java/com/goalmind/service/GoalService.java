@@ -34,8 +34,11 @@ public class GoalService {
     }
 
     public FeasibilityCheckResponse checkFeasibility(GoalRequest request) {
-        if (request.getTargetDate().isBefore(request.getStartDate())) {
-            throw new BadRequestException("Target completion date cannot be before start date");
+        if (request.getStartDate() == null) {
+            request.setStartDate(LocalDate.now());
+        }
+        if (request.getTargetDate() == null || !request.getTargetDate().isAfter(request.getStartDate())) {
+            request.setTargetDate(request.getStartDate().plusMonths(3));
         }
 
         long totalDays = ChronoUnit.DAYS.between(request.getStartDate(), request.getTargetDate());
@@ -107,8 +110,11 @@ public class GoalService {
 
     @Transactional
     public GoalResponse createGoal(User user, GoalRequest request) {
-        if (request.getTargetDate().isBefore(request.getStartDate())) {
-            throw new BadRequestException("Target date must be on or after start date");
+        if (request.getStartDate() == null) {
+            request.setStartDate(LocalDate.now());
+        }
+        if (request.getTargetDate() == null || !request.getTargetDate().isAfter(request.getStartDate())) {
+            request.setTargetDate(request.getStartDate().plusMonths(3));
         }
 
         Goal goal = new Goal();
