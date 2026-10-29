@@ -58,3 +58,4 @@
   - Executed complete end-to-end audit across all 11 modules and 50+ interactive buttons to guarantee flawless presentation for the hackathon judges.
   - Upgraded Interview Simulator grading system with dynamic semantic rubric evaluation based directly on the candidate's answer content, concept identification, and STAR metrics.
   - Revamped Roadmap Video Hub in `TopicLessonModal.tsx` and `videoRecommendationService.ts` to automatically match and embed the #1 best educational video for any roadmap topic with zero manual user input.
+  - Fixed Goal Creation feasibility check by adding self-healing date validation and client-side deterministic feasibility engine in `CreateGoalPage.tsx` and removing demo-only restriction in `api.ts`.
