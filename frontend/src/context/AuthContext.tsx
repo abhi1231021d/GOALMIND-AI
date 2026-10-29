@@ -15,6 +15,16 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const generateFallbackUserId = (uname: string): number => {
+  const clean = uname.trim().toLowerCase();
+  let hash = 0;
+  for (let i = 0; i < clean.length; i++) {
+    hash = ((hash << 5) - hash) + clean.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash) || 1000 + Math.floor(Math.random() * 9000);
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
     const cached = localStorage.getItem('goalmind_user');
@@ -84,10 +94,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (isCloudOrNetworkError) {
         console.warn('Backend server offline. Initiating resilient cloud session.');
+        const trimmed = username.trim();
         const fallbackUser: User = {
-          id: 1,
-          username: username.trim(),
-          email: `${username.trim()}@goalmind.ai`,
+          id: generateFallbackUserId(trimmed),
+          username: trimmed,
+          email: `${trimmed}@goalmind.ai`,
           timezone: 'UTC',
           createdAt: new Date().toISOString(),
         };
@@ -127,10 +138,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (isCloudOrNetworkError) {
         console.warn('Backend server offline. Initiating resilient cloud session.');
+        const trimmed = username.trim();
         const fallbackUser: User = {
-          id: 1,
-          username: username.trim(),
-          email: `${username.trim()}@goalmind.ai`,
+          id: generateFallbackUserId(trimmed),
+          username: trimmed,
+          email: `${trimmed}@goalmind.ai`,
           timezone: timezone || 'UTC',
           createdAt: new Date().toISOString(),
         };
@@ -155,6 +167,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       localStorage.removeItem('goalmind_token');
       localStorage.removeItem('goalmind_user');
+      try {
+        sessionStorage.removeItem('goalmind_bridge_payload');
+      } catch (_) {}
       setToken(null);
       setUser(null);
     }

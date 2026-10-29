@@ -10,6 +10,8 @@ import {
   Sliders,
   Moon,
   Sun,
+  Monitor,
+  Check,
   Bell,
   Clock,
   CheckCircle2,
@@ -36,7 +38,7 @@ const COMMON_TIMEZONES = [
 
 const SettingsPage: React.FC = () => {
   const { user: authUser } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   const [profile, setProfile] = useState<{ fullName: string; username: string; email: string; timezone: string }>({
     fullName: '',
@@ -353,29 +355,108 @@ const SettingsPage: React.FC = () => {
 
       {/* Visual Theme Appearance Card */}
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              {theme === 'dark' ? <Moon className="w-5 h-5 text-indigo-400" /> : <Sun className="w-5 h-5 text-amber-500" />}
-              Appearance Theme
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Currently using <span className="font-semibold capitalize text-gray-800 dark:text-gray-200">{theme} mode</span>.
-            </p>
-          </div>
-          <button
-            onClick={toggleTheme}
-            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-xs font-semibold text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-2"
-          >
+        <div className="mb-4">
+          <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
             {theme === 'dark' ? (
-              <>
-                <Sun className="w-4 h-4 text-amber-500" /> Switch to Light Mode
-              </>
+              <Moon className="w-5 h-5 text-indigo-400" />
+            ) : theme === 'light' ? (
+              <Sun className="w-5 h-5 text-amber-500" />
             ) : (
-              <>
-                <Moon className="w-4 h-4 text-indigo-500" /> Switch to Dark Mode
-              </>
+              <Monitor className="w-5 h-5 text-indigo-500" />
             )}
+            Appearance & Theme
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Select your preferred display theme or sync automatically with your system settings.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Light Theme Card */}
+          <button
+            type="button"
+            onClick={() => setTheme('light')}
+            className={`p-4 rounded-xl border-2 text-left transition relative flex flex-col justify-between ${
+              theme === 'light'
+                ? 'border-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/20'
+                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+            }`}
+          >
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
+                  <Sun className="w-4 h-4" />
+                </div>
+                {theme === 'light' && (
+                  <span className="flex items-center space-x-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400">
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Active</span>
+                  </span>
+                )}
+              </div>
+              <h4 className="text-sm font-bold text-gray-900 dark:text-white">Light Mode</h4>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                Crisp, high-contrast light backgrounds optimal for daytime productivity.
+              </p>
+            </div>
+          </button>
+
+          {/* Dark Theme Card */}
+          <button
+            type="button"
+            onClick={() => setTheme('dark')}
+            className={`p-4 rounded-xl border-2 text-left transition relative flex flex-col justify-between ${
+              theme === 'dark'
+                ? 'border-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/20'
+                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+            }`}
+          >
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-8 h-8 rounded-lg bg-indigo-900/40 text-indigo-400 flex items-center justify-center">
+                  <Moon className="w-4 h-4" />
+                </div>
+                {theme === 'dark' && (
+                  <span className="flex items-center space-x-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400">
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Active</span>
+                  </span>
+                )}
+              </div>
+              <h4 className="text-sm font-bold text-gray-900 dark:text-white">Dark Mode</h4>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                Deep slate colors designed for reduced glare and comfortable night work.
+              </p>
+            </div>
+          </button>
+
+          {/* System Default Card */}
+          <button
+            type="button"
+            onClick={() => setTheme('system')}
+            className={`p-4 rounded-xl border-2 text-left transition relative flex flex-col justify-between ${
+              theme === 'system'
+                ? 'border-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/20'
+                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+            }`}
+          >
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center">
+                  <Monitor className="w-4 h-4" />
+                </div>
+                {theme === 'system' && (
+                  <span className="flex items-center space-x-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400">
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Active</span>
+                  </span>
+                )}
+              </div>
+              <h4 className="text-sm font-bold text-gray-900 dark:text-white">System Auto</h4>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                Matches your OS preference seamlessly whenever your device switches.
+              </p>
+            </div>
           </button>
         </div>
       </div>

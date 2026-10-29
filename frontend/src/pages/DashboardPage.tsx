@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { analyticsService, goalService } from '../services/api';
 import { DashboardAnalytics, Goal } from '../types';
 import { StatCard } from '../components/common/StatCard';
@@ -17,20 +18,25 @@ import {
   CalendarCheck,
   Bot,
   RefreshCw,
-  Award
+  Award,
+  FileCheck2,
+  Mic
 } from 'lucide-react';
 
 export const DashboardPage: React.FC = () => {
+  const { user } = useAuth();
   const [data, setData] = useState<DashboardAnalytics | null>(null);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     loadDashboard();
-  }, []);
+  }, [user?.id, user?.username]);
 
   const loadDashboard = async () => {
     setIsLoading(true);
+    setData(null);
+    setGoals([]);
     try {
       const [analyticsRes, goalsRes] = await Promise.all([
         analyticsService.getDashboard(),
@@ -83,10 +89,12 @@ export const DashboardPage: React.FC = () => {
             <span>AI Goal Intelligence Active</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Dashboard & Execution Hub
+            {user?.fullName || user?.username ? `Welcome back, ${user.fullName || user.username}! 👋` : 'Dashboard & Execution Hub'}
           </h1>
           <p className="text-sm text-indigo-100/90 mt-1.5 leading-relaxed">
-            Continuously tracking the gap between what you planned and what you executed.
+            {goals.length === 0
+              ? 'Welcome to your personalized workspace! Create your first goal to unlock AI roadmaps, daily scheduling, and performance analytics.'
+              : 'Continuously tracking the gap between what you planned and what you executed.'}
           </p>
         </div>
 
@@ -249,19 +257,39 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {goals.length === 0 ? (
-          <div className="text-center p-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800">
-            <Target className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">No goals created yet</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">
-              Create your first personal or career goal to start generating AI roadmaps and daily schedules.
+          <div className="text-center p-10 sm:p-14 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto mb-4">
+              <Target className="w-7 h-7" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              Welcome, {user?.fullName || user?.username || 'Achiever'}! Ready to create your first goal?
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-6 leading-relaxed">
+              Your dashboard updates automatically as you define targets. Generate custom AI roadmaps, track consistency streaks, or try our Career Intelligence tools below.
             </p>
-            <Link
-              to="/goals/new"
-              className="inline-flex items-center space-x-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-2xl shadow transition"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Create My First Goal</span>
-            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Link
+                to="/goals/new"
+                className="inline-flex items-center space-x-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-2xl shadow-md transition active:scale-95"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Create My First Goal</span>
+              </Link>
+              <Link
+                to="/resume-analyzer"
+                className="inline-flex items-center space-x-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-2xl transition active:scale-95"
+              >
+                <FileCheck2 className="w-4 h-4 text-indigo-500" />
+                <span>Analyze My Resume</span>
+              </Link>
+              <Link
+                to="/interview-simulator"
+                className="inline-flex items-center space-x-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-2xl transition active:scale-95"
+              >
+                <Mic className="w-4 h-4 text-cyan-500" />
+                <span>Simulate Interview</span>
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

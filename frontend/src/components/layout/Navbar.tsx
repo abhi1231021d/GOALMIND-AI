@@ -7,6 +7,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Sun,
   Moon,
+  Monitor,
   Bell,
   LogOut,
   User as UserIcon,
@@ -127,11 +128,23 @@ export const Navbar: React.FC = () => {
 
         {/* Theme Toggle */}
         <button
-          onClick={() => setTheme(isDark ? 'light' : 'dark')}
-          className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-          title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+          onClick={() => {
+            const nextTheme = theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light';
+            setTheme(nextTheme);
+          }}
+          className="flex items-center space-x-1.5 p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition text-xs"
+          title={`Theme: ${theme.toUpperCase()} (Click to toggle Light / Dark / System)`}
         >
-          {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
+          {theme === 'dark' ? (
+            <Moon className="w-4 h-4 text-indigo-400" />
+          ) : theme === 'light' ? (
+            <Sun className="w-4 h-4 text-amber-500" />
+          ) : (
+            <Monitor className="w-4 h-4 text-slate-400" />
+          )}
+          <span className="hidden sm:inline-block text-[10px] font-semibold uppercase text-slate-400">
+            {theme}
+          </span>
         </button>
 
         {/* Notifications Dropdown */}

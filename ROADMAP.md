@@ -105,3 +105,22 @@ Unify GoalMind AI with AI Resume Analyzer and Interview Simulator into a single 
 - [x] Standardize bridge redirects to `/goals/new`.
 - [x] Add unit test suite `ResumeServiceTest.java` (4/4 passing).
 - [x] Verify backend compilation and packaging (`BUILD SUCCESS` in 8.7s) and frontend production build (`tsc && vite build` in 6.9s).
+
+---
+
+## Milestone 4: Multi-Tenant Dashboard Partitioning & System-Wide Theme Switcher
+
+### Phase 18: Multi-Tenant Dashboard Isolation
+- [x] Partition mock & fallback storage per username in `frontend/src/services/api.ts` (`goalmind_local_goals_${currentUsername}`).
+- [x] Dynamically compute dashboard analytics (`/analytics/dashboard`) strictly from the logged-in user's goals.
+- [x] Eliminate hardcoded `id: 1` in `AuthContext.tsx` by deriving deterministic numeric user IDs via `generateFallbackUserId(username)`.
+- [x] Clear `goalmind_bridge_payload` and session state cleanly upon logout.
+- [x] Bind `DashboardPage.tsx` fetching to `[user?.id, user?.username]` so switching user accounts immediately wipes old state and loads that user's personalized dashboard.
+- [x] Add personalized welcome greeting (`Welcome back, {name}!`) and clear empty onboarding states for accounts with 0 goals.
+
+### Phase 19: Comprehensive 3-Mode Theme Switcher
+- [x] Add 3-button segmented Theme Quick Switcher in `frontend/src/components/layout/Sidebar.tsx` (`[ ☀️ Light | 🌙 Dark | 💻 Auto ]`).
+- [x] Enhance theme toggle in `frontend/src/components/layout/Navbar.tsx` with active mode indicator and cycling support.
+- [x] Upgrade Appearance section in `frontend/src/pages/SettingsPage.tsx` to a visual 3-card theme picker with instant reactivity.
+- [x] Verify frontend production build (`npm run build` -> 0 errors).
+- [x] Synchronize both repositories (`GoalMind-AI` and subfolder `GOALMIND-AI`).

@@ -55,52 +55,99 @@ api.interceptors.response.use(
     if (isOfflineOrCloud500 && isDemoSession) {
       const url = error.config?.url || '';
 
-      // Mock dashboard analytics
+      // Determine current user storage key for complete multi-tenant isolation
+      const cachedUserStr = localStorage.getItem('goalmind_user');
+      let currentUsername = 'guest';
+      try {
+        if (cachedUserStr) {
+          const u = JSON.parse(cachedUserStr);
+          if (u.username) currentUsername = String(u.username).trim().toLowerCase();
+        }
+      } catch (_) {}
+
+      const userGoalsKey = `goalmind_local_goals_${currentUsername}`;
+      const getUserGoals = (): any[] => {
+        try {
+          const raw = localStorage.getItem(userGoalsKey);
+          return raw ? JSON.parse(raw) : [];
+        } catch (_) {
+          return [];
+        }
+      };
+
+      // Mock dashboard analytics - strictly computed from this specific user's goals
       if (url.includes('/analytics/dashboard')) {
+        const goals = getUserGoals();
+        const totalGoals = goals.length;
+        const activeGoals = goals.filter((g: any) => g.status === 'ACTIVE' || !g.status).length;
+        const completedGoals = goals.filter((g: any) => g.status === 'COMPLETED').length;
+
+        const allTasks: any[] = [];
+        goals.forEach((g: any) => {
+          if (Array.isArray(g.tasks)) allTasks.push(...g.tasks);
+          if (Array.isArray(g.milestones)) {
+            g.milestones.forEach((m: any) => {
+              if (Array.isArray(m.tasks)) allTasks.push(...m.tasks);
+            });
+          }
+        });
+
+        const totalTasks = allTasks.length;
+        const completedTasks = allTasks.filter((t: any) => t.status === 'COMPLETED').length;
+        const inProgressTasks = allTasks.filter((t: any) => t.status === 'IN_PROGRESS').length;
+        const pendingTasks = totalTasks - completedTasks - inProgressTasks;
+        const taskCompletionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 1000) / 10 : 0;
+        const goalProgressRate = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 1000) / 10 : 0;
+        const consistencyRate = totalGoals > 0 ? (completedTasks > 0 ? 85.0 : 50.0) : 0;
+        const currentStreakDays = completedTasks > 0 ? 1 : 0;
+
         return Promise.resolve({
           data: {
-            totalGoals: 2,
-            activeGoals: 2,
-            completedGoals: 0,
-            totalTasks: 6,
-            completedTasks: 2,
-            inProgressTasks: 1,
-            pendingTasks: 3,
-            taskCompletionRate: 33.3,
-            timeUtilizationRate: 75.0,
-            goalProgressRate: 35.0,
-            consistencyRate: 90.0,
-            currentStreakDays: 4,
-            longestStreakDays: 7,
-            todayPlannedTasks: 2,
-            todayCompletedTasks: 1,
-            todayFocusMinutes: 50,
-            upcomingTasks: [],
-            activeGoalsSummary: []
+            totalGoals,
+            activeGoals,
+            completedGoals,
+            totalTasks,
+            completedTasks,
+            inProgressTasks: Math.max(0, inProgressTasks),
+            pendingTasks: Math.max(0, pendingTasks),
+            overdueTasks: 0,
+            totalPlannedMinutes: allTasks.reduce((sum: number, t: any) => sum + (t.estimatedMinutes || 60), 0),
+            totalActualMinutes: allTasks.reduce((sum: number, t: any) => sum + (t.actualMinutes || 0), 0),
+            taskCompletionRate,
+            timeUtilizationRate: totalTasks > 0 ? 70.0 : 0,
+            goalProgressRate,
+            consistencyRate,
+            currentStreakDays,
+            longestStreakDays: currentStreakDays,
+            todayPlannedTasks: Math.min(3, totalTasks),
+            todayCompletedTasks: Math.min(completedTasks, 3),
+            todayFocusMinutes: completedTasks * 45,
+            upcomingTasks: allTasks.filter((t: any) => t.status !== 'COMPLETED').slice(0, 5),
+            activeGoalsSummary: goals.filter((g: any) => g.status !== 'COMPLETED').slice(0, 4)
           } as DashboardAnalytics
         });
       }
 
-      // Mock goals list
+      // Mock single goal by ID
+      const singleGoalMatch = url.match(/\/goals\/(\d+)$/);
+      if (singleGoalMatch && error.config?.method === 'get') {
+        const goalId = parseInt(singleGoalMatch[1], 10);
+        const goals = getUserGoals();
+        const found = goals.find((g: any) => g.id === goalId);
+        if (found) return Promise.resolve({ data: found });
+      }
+
+      // Mock delete goal
+      if (error.config?.method === 'delete' && singleGoalMatch) {
+        const goalId = parseInt(singleGoalMatch[1], 10);
+        const goals = getUserGoals().filter((g: any) => g.id !== goalId);
+        localStorage.setItem(userGoalsKey, JSON.stringify(goals));
+        return Promise.resolve({ data: { message: 'Goal deleted successfully' } });
+      }
+
+      // Mock goals list - strictly for this specific user
       if (url === '/goals' || url.endsWith('/goals')) {
-        const local = localStorage.getItem('goalmind_local_goals');
-        const goals = local ? JSON.parse(local) : [
-          {
-            id: 1,
-            title: 'Master Cloud Architecture & Kubernetes',
-            description: 'Career intelligence goal pre-configured for cloud exploration',
-            category: 'CAREER',
-            priority: 'HIGH',
-            difficulty: 'CHALLENGING',
-            status: 'ACTIVE',
-            progress: 35,
-            startDate: new Date().toISOString().split('T')[0],
-            targetDate: new Date(Date.now() + 60 * 24 * 3600 * 1000).toISOString().split('T')[0],
-            dailyHours: 2.0,
-            daysPerWeek: 6,
-            milestones: []
-          }
-        ];
+        const goals = getUserGoals();
         return Promise.resolve({ data: goals });
       }
 
@@ -120,7 +167,7 @@ api.interceptors.response.use(
         });
       }
 
-      // Mock create goal
+      // Mock create goal - saves strictly into this user's storage
       if (error.config?.method === 'post' && (url === '/goals' || url.endsWith('/goals'))) {
         const body = JSON.parse(error.config.data || '{}');
         const newGoal = {
@@ -128,12 +175,16 @@ api.interceptors.response.use(
           ...body,
           status: 'ACTIVE',
           progress: 0,
+          progressPercentage: 0,
+          totalTasks: 0,
+          completedTasks: 0,
+          totalMilestones: 0,
+          completedMilestones: 0,
           milestones: []
         };
-        const local = localStorage.getItem('goalmind_local_goals');
-        const goals = local ? JSON.parse(local) : [];
-        goals.push(newGoal);
-        localStorage.setItem('goalmind_local_goals', JSON.stringify(goals));
+        const goals = getUserGoals();
+        goals.unshift(newGoal);
+        localStorage.setItem(userGoalsKey, JSON.stringify(goals));
         return Promise.resolve({ data: newGoal });
       }
 
