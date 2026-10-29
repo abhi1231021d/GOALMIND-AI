@@ -25,7 +25,7 @@ if (Test-Path $localMvn) {
 
 Write-Host ">>> Starting Unified Career Intelligence Monolith Backend (Port 8080)..." -ForegroundColor Green
 $backendJar = Join-Path $root "backend\target\goalmind-backend-1.0.0.jar"
-if (Test-Path $backendJar) {
+if (Test-Path $backendJar -and (Get-Item $backendJar).Length -gt 15000000) {
     Start-Process -FilePath "java.exe" -ArgumentList "-jar `"$backendJar`"" -WorkingDirectory (Join-Path $root "backend") -WindowStyle Hidden
 } else {
     Start-Process -FilePath $mvnPath -ArgumentList "spring-boot:run" -WorkingDirectory (Join-Path $root "backend") -WindowStyle Hidden

@@ -1169,6 +1169,27 @@ export const InterviewSimulatorPage: React.FC = () => {
                       </div>
                     )}
 
+                    {currentQ.staffModel && (
+                      <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        {currentQ.staffModel.conceptsCovered && currentQ.staffModel.conceptsCovered.length > 0 && (
+                          <div style={{ fontSize: '11px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ color: '#6ee7b7', fontWeight: 700 }}>✓ Covered:</span>
+                            {currentQ.staffModel.conceptsCovered.map((c: string, idx: number) => (
+                              <span key={idx} className="chip-tag matched" style={{ fontSize: '10px', padding: '2px 6px' }}>{c}</span>
+                            ))}
+                          </div>
+                        )}
+                        {currentQ.staffModel.conceptsMissed && currentQ.staffModel.conceptsMissed.length > 0 && (
+                          <div style={{ fontSize: '11px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ color: '#fda4af', fontWeight: 700 }}>⚠️ Key Omissions:</span>
+                            {currentQ.staffModel.conceptsMissed.map((c: string, idx: number) => (
+                              <span key={idx} className="chip-tag missing" style={{ fontSize: '10px', padding: '2px 6px' }}>{c}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {currentQ.harderFollowUp && (
                       <div className="followup-box">
                         <div className="section-kicker">⚡ INTERACTIVE FOLLOW-UP DEFENSE (+UP TO 2 RECOVERY PTS)</div>

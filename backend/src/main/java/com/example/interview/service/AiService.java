@@ -237,6 +237,12 @@ public class AiService {
                     false);
         }
 
+        if (nonEmptyWords < 20) {
+            return new InterviewDtos.Evaluation(1,
+                    "Answer is too brief to evaluate technical competence. Detail your architecture, actions taken ('I'), and trade-offs.",
+                    false);
+        }
+
         boolean technical = lowerCategory.contains("technical") || lowerCategory.contains("coding")
                 || lowerCategory.contains("system") || lowerCategory.contains("problem")
                 || lowerCategory.contains("project") || lowerCategory.contains("payment")
@@ -249,16 +255,16 @@ public class AiService {
         boolean hasExample = cleaned.matches("(?si).*\\b(i|we|my|our|project|implemented|built|resolved|measured|result|experience|team|customer|created|designed|used|handled|improved|delivered|achieved|reduced|increased|pass|iterate|complexity)\\b.*");
 
         if (technical && !hasTechnicalEvidence) {
-            return new InterviewDtos.Evaluation(0, "This answer does not address the technical question. Include the approach, relevant technical concepts, and why your solution works.", false);
+            return new InterviewDtos.Evaluation(2, "This answer does not address the core technical problem. Include your technical architecture, relevant tools/algorithms, and why your solution works.", false);
         }
         if (!technical && !hasExample) {
-            return new InterviewDtos.Evaluation(0, "This answer is too general for a real interview. Give a specific situation, what you did, and the result.", false);
+            return new InterviewDtos.Evaluation(2, "This answer is too abstract for a real interview. Use the STAR method: describe a specific situation, what you personally did ('I'), and the measurable result.", false);
         }
 
-        // Multi-signal rubric scoring (rewards concrete evidence, metrics, trade-offs, and distinct vocabulary instead of raw character padding)
-        int score = 4;
+        // Multi-signal rubric scoring reflecting candidate's exact answer content
+        int score = 3;
         if (hasExample) score += 1;
-        if (hasTechnicalEvidence) score += 1;
+        if (hasTechnicalEvidence) score += 2;
 
         boolean hasMetricsOrComplexity = lowerAnswer.matches("(?s).*\\b(\\d+%|\\d+x|\\d+\\s*(ms|s|sec|rps|qps|gb|mb|users|reqs)|o\\(n\\)|o\\(1\\)|o\\(log n\\)|linear|constant)\\b.*");
         if (hasMetricsOrComplexity) score += 2;
@@ -266,18 +272,25 @@ public class AiService {
         boolean hasReasoningOrTradeoff = lowerAnswer.matches("(?s).*\\b(because|trade-off|tradeoff|instead|versus|vs|however|prevent|avoid|ensure|latency|consistency|bottleneck|aligned|resolved)\\b.*");
         if (hasReasoningOrTradeoff) score += 1;
 
-        if (uniqueWords.size() >= 28) score += 1;
-        score = Math.min(10, Math.max(4, score));
+        if (uniqueWords.size() >= 35) score += 1;
+        if (lowerAnswer.contains("i implemented") || lowerAnswer.contains("i designed") || lowerAnswer.contains("i engineered") || lowerAnswer.contains("i led")) score += 1;
+
+        if (nonEmptyWords < 45) {
+            score = Math.min(score, 5);
+        }
+        score = Math.min(10, Math.max(1, score));
 
         String feedback;
         if (score >= 8) {
-            feedback = "Strong, well-evidenced answer with clear technical ownership and measurable impact.";
-        } else if (!hasMetricsOrComplexity) {
-            feedback = "Answer accepted. Strengthen it to Staff level by quantifying the impact (e.g., latency %, QPS, or Big-O complexity).";
+            feedback = "Outstanding answer! Well-evidenced technical ownership, concrete metrics, and clear trade-off analysis matching Staff Engineer bar.";
+        } else if (score >= 5) {
+            feedback = !hasMetricsOrComplexity 
+                ? "Answer accepted (" + score + "/10). Elevate to Staff level by quantifying your impact (e.g. p99 latency %, QPS scale, or Big-O bounds)."
+                : "Answer accepted (" + score + "/10). Strengthen further by defending against failure modes and explaining alternative trade-offs considered.";
         } else {
-            feedback = "Answer accepted. Improve it further by explicitly stating the trade-offs of your approach and failure-handling edge cases.";
+            feedback = "Needs improvement (" + score + "/10). Answer is high-level. Structure your response with the STAR framework and specify exact engineering decisions and measurable outcomes.";
         }
-        return new InterviewDtos.Evaluation(score, feedback, true);
+        return new InterviewDtos.Evaluation(score, feedback, score >= 4);
     }
 
     private List<String> offlineQuestions(String role, List<String> topics, int count,

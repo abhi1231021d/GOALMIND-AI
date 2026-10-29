@@ -468,32 +468,88 @@ public class AiService {
     }
 
     private String deriveDefaultVideoForTopic(String title) {
-        if (title == null) return "https://www.youtube.com/embed/m6p3y_l0Z1I";
+        if (title == null) return "https://www.youtube.com/embed/i53Gi_K3o7I";
         String lower = title.toLowerCase();
-        if (lower.contains("java") || lower.contains("syntax") || lower.contains("oop") || lower.contains("variable") || lower.contains("loop")) {
-            return "https://www.youtube.com/embed/xk4_1vDrzzo";
-        } else if (lower.contains("spring") || lower.contains("controller") || lower.contains("rest") || lower.contains("api")) {
-            return "https://www.youtube.com/embed/9SGDpanrc8U";
-        } else if (lower.contains("sql") || lower.contains("database") || lower.contains("schema") || lower.contains("query")) {
+        
+        // System Design, Architecture & Distributed Systems
+        if (lower.contains("system design") || lower.contains("architecture") || lower.contains("decomposition") || lower.contains("scalability") || lower.contains("blueprint") || lower.contains("distributed")) {
+            return "https://www.youtube.com/embed/i53Gi_K3o7I";
+        } else if (lower.contains("cache") || lower.contains("redis") || lower.contains("memcached") || lower.contains("invalidation") || lower.contains("latency")) {
+            return "https://www.youtube.com/embed/bUHFg8CZFcA";
+        } else if (lower.contains("kafka") || lower.contains("queue") || lower.contains("event") || lower.contains("message") || lower.contains("stream")) {
+            return "https://www.youtube.com/embed/S068j5yP98c";
+        } else if (lower.contains("sharding") || lower.contains("replication") || lower.contains("partition") || lower.contains("high-throughput")) {
+            return "https://www.youtube.com/embed/5faMjKuB9bc";
+        } else if (lower.contains("microservice") || lower.contains("service layer") || lower.contains("gateway") || lower.contains("circuit breaker")) {
+            return "https://www.youtube.com/embed/j50W9E-KzC0";
+            
+        // Databases & SQL
+        } else if (lower.contains("index") || lower.contains("b-tree") || lower.contains("optimization") || lower.contains("explain") || lower.contains("query")) {
+            return "https://www.youtube.com/embed/7S_tz1z_5bA";
+        } else if (lower.contains("sql") || lower.contains("database") || lower.contains("schema") || lower.contains("normalization") || lower.contains("3nf") || lower.contains("relational")) {
             return "https://www.youtube.com/embed/ztHopE5Wnpc";
-        } else if (lower.contains("react") || lower.contains("frontend") || lower.contains("ui") || lower.contains("component")) {
-            return "https://www.youtube.com/embed/bMknfKXIFA8";
-        } else if (lower.contains("test") || lower.contains("junit") || lower.contains("mock")) {
+        } else if (lower.contains("jpa") || lower.contains("hibernate") || lower.contains("orm") || lower.contains("mapping") || lower.contains("entity")) {
+            return "https://www.youtube.com/embed/8SGI_XS5OPw";
+            
+        // Spring Boot, Backend & Security
+        } else if (lower.contains("security") || lower.contains("jwt") || lower.contains("auth") || lower.contains("token") || lower.contains("oauth")) {
+            return "https://www.youtube.com/embed/KxqlJblhzfI";
+        } else if (lower.contains("spring") || lower.contains("controller") || lower.contains("rest") || lower.contains("api") || lower.contains("crud")) {
+            return "https://www.youtube.com/embed/9SGDpanrc8U";
+        } else if (lower.contains("validation") || lower.contains("error") || lower.contains("exception")) {
+            return "https://www.youtube.com/embed/L5bkgp5tCqg";
+        } else if (lower.contains("java") || lower.contains("syntax") || lower.contains("oop") || lower.contains("variable") || lower.contains("loop")) {
+            return "https://www.youtube.com/embed/xk4_1vDrzzo";
+            
+        // Data Structures & Algorithms
+        } else if (lower.contains("heap") || lower.contains("median") || lower.contains("priority queue")) {
+            return "https://www.youtube.com/embed/itmhHWaHupI";
+        } else if (lower.contains("lru") || lower.contains("doubly linked")) {
+            return "https://www.youtube.com/embed/7ABFKPK2hD4";
+        } else if (lower.contains("graph") || lower.contains("bfs") || lower.contains("dfs") || lower.contains("dijkstra")) {
+            return "https://www.youtube.com/embed/tWVWeAqZ0WU";
+        } else if (lower.contains("dynamic programming") || lower.contains("dp") || lower.contains("memoization")) {
+            return "https://www.youtube.com/embed/oBt53YbR9Kk";
+        } else if (lower.contains("algorithm") || lower.contains("data structure") || lower.contains("leetcode") || lower.contains("tree") || lower.contains("binary search")) {
+            return "https://www.youtube.com/embed/8hly31xKli0";
+            
+        // Testing & Quality
+        } else if (lower.contains("test") || lower.contains("junit") || lower.contains("mock") || lower.contains("harness") || lower.contains("ci") || lower.contains("integration test")) {
             return "https://www.youtube.com/embed/F4jZkKXZH6Q";
-        } else if (lower.contains("docker") || lower.contains("deploy") || lower.contains("container") || lower.contains("cloud")) {
+        } else if (lower.contains("clean code") || lower.contains("solid") || lower.contains("refactor")) {
+            return "https://www.youtube.com/embed/y7Tq3XWj8m0";
+            
+        // Frontend & UI
+        } else if (lower.contains("react") || lower.contains("frontend") || lower.contains("ui") || lower.contains("component") || lower.contains("hook")) {
+            return "https://www.youtube.com/embed/bMknfKXIFA8";
+        } else if (lower.contains("web vitals") || lower.contains("lcp") || lower.contains("inp") || lower.contains("performance")) {
+            return "https://www.youtube.com/embed/zQnBQ4tB3ZA";
+            
+        // DevOps & Cloud
+        } else if (lower.contains("kubernetes") || lower.contains("k8s") || lower.contains("cluster")) {
+            return "https://www.youtube.com/embed/X48VuDVv0do";
+        } else if (lower.contains("docker") || lower.contains("deploy") || lower.contains("container") || lower.contains("cloud") || lower.contains("docker compose")) {
             return "https://www.youtube.com/embed/3c-iBn73dDE";
+        } else if (lower.contains("pipeline") || lower.contains("github actions") || lower.contains("automation")) {
+            return "https://www.youtube.com/embed/R8_veQiYBjI";
+            
+        // AI & Machine Learning
+        } else if (lower.contains("ai") || lower.contains("neural network") || lower.contains("machine learning") || lower.contains("deep learning")) {
+            return "https://www.youtube.com/embed/aircAruvnKk";
+        } else if (lower.contains("rag") || lower.contains("llm") || lower.contains("vector")) {
+            return "https://www.youtube.com/embed/q8pUPiun5K0";
+            
+        // Interview & Behavioral
+        } else if (lower.contains("interview") || lower.contains("star") || lower.contains("behavioral") || lower.contains("leadership")) {
+            return "https://www.youtube.com/embed/PJKYqLH4eoY";
+            
+        // Fitness / Habit / Productivity
         } else if (lower.contains("fit") || lower.contains("workout") || lower.contains("movement") || lower.contains("mobility") || lower.contains("cardio") || lower.contains("stretch")) {
-            return "https://www.youtube.com/embed/UBMk30rjy0o";
-        } else if (lower.contains("strength") || lower.contains("resistance") || lower.contains("muscle") || lower.contains("exercise")) {
-            return "https://www.youtube.com/embed/rP7A1W2ZqJk";
-        } else if (lower.contains("nutrition") || lower.contains("diet") || lower.contains("meal") || lower.contains("calorie")) {
-            return "https://www.youtube.com/embed/Gmh_xMMJ2Pw";
-        } else if (lower.contains("writ") || lower.contains("book") || lower.contains("draft") || lower.contains("story") || lower.contains("outline") || lower.contains("chapter")) {
-            return "https://www.youtube.com/embed/VpZr8JATvQY";
-        } else if (lower.contains("edit") || lower.contains("revision") || lower.contains("proofread")) {
-            return "https://www.youtube.com/embed/8b3q27YJ3gQ";
+            return "https://www.youtube.com/embed/tz_bH6c5mNk";
+        } else if (lower.contains("deep work") || lower.contains("focus") || lower.contains("habit") || lower.contains("productivity")) {
+            return "https://www.youtube.com/embed/mK9k2t5J1yE";
         } else {
-            return "https://www.youtube.com/embed/m6p3y_l0Z1I";
+            return "https://www.youtube.com/embed/i53Gi_K3o7I";
         }
     }
 

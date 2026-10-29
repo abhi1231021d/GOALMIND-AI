@@ -202,7 +202,7 @@ api.interceptors.response.use(
                   dueDate: '2026-11-02',
                   status: 'COMPLETED',
                   topicExplanation: 'Master the principles of decoupled microservices and event-driven architecture.',
-                  videoUrl: 'https://www.youtube.com/embed/ztHopE5Wnpc'
+                  videoUrl: 'https://www.youtube.com/embed/i53Gi_K3o7I'
                 },
                 {
                   id: 1002,
@@ -218,7 +218,7 @@ api.interceptors.response.use(
                   dueDate: '2026-11-05',
                   status: 'IN_PROGRESS',
                   topicExplanation: 'Establish test-driven design workflows to guarantee reliable software releases.',
-                  videoUrl: 'https://www.youtube.com/embed/7S_tz1z_5bA'
+                  videoUrl: 'https://www.youtube.com/embed/F4jZkKXZH6Q'
                 }
               ]
             },
@@ -248,7 +248,7 @@ api.interceptors.response.use(
                   dueDate: '2026-11-15',
                   status: 'PENDING',
                   topicExplanation: 'Optimize database throughput and avoid table scans using composite B-Tree indexes.',
-                  videoUrl: 'https://www.youtube.com/embed/8SGI_XS5OPw'
+                  videoUrl: 'https://www.youtube.com/embed/ztHopE5Wnpc'
                 },
                 {
                   id: 1004,
@@ -294,7 +294,7 @@ api.interceptors.response.use(
                   dueDate: '2026-12-05',
                   status: 'PENDING',
                   topicExplanation: 'Tune cache hit ratios and prevent stampede effects using distributed locks.',
-                  videoUrl: 'https://www.youtube.com/embed/F4jZkKXZH6Q'
+                  videoUrl: 'https://www.youtube.com/embed/bUHFg8CZFcA'
                 },
                 {
                   id: 1006,
@@ -310,7 +310,7 @@ api.interceptors.response.use(
                   dueDate: targetGoal.targetDate || '2026-12-15',
                   status: 'PENDING',
                   topicExplanation: 'Document system architecture and prepare evidence for peer review.',
-                  videoUrl: 'https://www.youtube.com/embed/bMknfKXIFA8'
+                  videoUrl: 'https://www.youtube.com/embed/3c-iBn73dDE'
                 }
               ]
             }

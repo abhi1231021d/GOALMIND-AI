@@ -3,6 +3,7 @@ import { Task } from '../../types';
 import { taskService } from '../../services/api';
 import {
   getVideosForTopic,
+  getBestVideoForTask,
   generateCustomYouTubeSearchUrl,
   cleanAndFormatEmbedUrl,
   RecommendedVideo,
@@ -72,11 +73,12 @@ export const TopicLessonModal: React.FC<TopicLessonModalProps> = ({
   const [customKeywords, setCustomKeywords] = useState<string>('');
   const [showFilters, setShowFilters] = useState<boolean>(false);
 
-  // Sync state when task changes
+  // Sync state when task changes - Automatically selects best video based on topic
   useEffect(() => {
     if (task) {
-      setActiveVideoUrl(task.videoUrl || '');
-      setCustomVideoUrl(task.videoUrl || '');
+      const best = getBestVideoForTask(task.title, task.milestoneTitle, task.videoUrl);
+      setActiveVideoUrl(best.embedUrl);
+      setCustomVideoUrl(best.embedUrl);
       setSaveSuccessMessage(null);
       setIsEditingVideo(false);
       setCustomKeywords('');
